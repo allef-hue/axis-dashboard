@@ -23,7 +23,7 @@ export default function Header({
     <header className="header">
       <div className="header-left">
         <div className="header-logo">AXIS</div>
-        <div className="header-subtitle">Grupo Vorp · Pace Comercial</div>
+        <div className="header-subtitle">Grupo Vorp · Pace Comercial (v2024.04.24)</div>
       </div>
 
       <div className="header-center">
