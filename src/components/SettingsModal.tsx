@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { SDRConfig, CloserConfig } from '../types';
+import { SDRConfig, CloserConfig, LeadershipGoals } from '../types';
 import { generateUniqueId } from '../configStorage';
 import { parseImportCSV, generateCSVTemplate, ImportRow, ImportPreview } from '../storage';
 import { formatDate } from '../utils';
@@ -7,7 +7,8 @@ import { formatDate } from '../utils';
 interface SettingsModalProps {
   sdrConfigs: SDRConfig[];
   closerConfigs: CloserConfig[];
-  onSave: (sdr: SDRConfig[], closer: CloserConfig[]) => void;
+  leadershipGoals: LeadershipGoals;
+  onSave: (sdr: SDRConfig[], closer: CloserConfig[], leadership?: LeadershipGoals) => void;
   onClose: () => void;
   onExportCSV?: () => void;
   onImportConfirm?: (rows: ImportRow[]) => void;
@@ -15,7 +16,7 @@ interface SettingsModalProps {
   endDate?: string;
 }
 
-type Tab = 'sdr' | 'closer' | 'import-export';
+type Tab = 'sdr' | 'closer' | 'lideranca' | 'import-export';
 
 const NEW_PREFIX = '_new_';
 
@@ -29,6 +30,7 @@ function cloneCloser(configs: CloserConfig[]): CloserConfig[] {
 export default function SettingsModal({
   sdrConfigs,
   closerConfigs,
+  leadershipGoals,
   onSave,
   onClose,
   onExportCSV,
@@ -39,6 +41,10 @@ export default function SettingsModal({
   const [tab, setTab] = useState<Tab>('sdr');
   const [localSdr, setLocalSdr] = useState<SDRConfig[]>(() => cloneSdr(sdrConfigs));
   const [localCloser, setLocalCloser] = useState<CloserConfig[]>(() => cloneCloser(closerConfigs));
+  const [localLeadership, setLocalLeadership] = useState<LeadershipGoals>(() => ({
+    sdr: { ...leadershipGoals.sdr },
+    closer: { ...leadershipGoals.closer },
+  }));
   const [error, setError] = useState('');
 
   // Access code
@@ -215,7 +221,7 @@ export default function SettingsModal({
       });
     };
 
-    onSave(resolveSdr(), resolveCloser());
+    onSave(resolveSdr(), resolveCloser(), localLeadership);
   };
 
   // Check if we need to show access code form
@@ -301,10 +307,16 @@ export default function SettingsModal({
                 <span className="settings-tab-count">{localCloser.length}</span>
               </button>
               <button
+                className={`settings-tab ${tab === 'lideranca' ? 'active' : ''}`}
+                onClick={() => setTab('lideranca')}
+              >
+                Metas Gerais
+              </button>
+              <button
                 className={`settings-tab ${tab === 'import-export' ? 'active' : ''}`}
                 onClick={() => setTab('import-export')}
               >
-                📁 Importar/Exportar
+                Importar/Exportar
               </button>
             </div>
 
@@ -492,6 +504,221 @@ export default function SettingsModal({
               <button className="settings-add-btn" onClick={addCloser}>
                 + Adicionar Closer
               </button>
+            </>
+          )}
+
+          {tab === 'lideranca' && (
+            <>
+              <div className="settings-hint">
+                Metas gerais da liderança. Esses valores serão comparados com os dados realizados na aba "Pace Da Liderança".
+              </div>
+
+              <div className="leadership-settings-section">
+                <h3 className="leadership-section-title">Metas SDR</h3>
+                <div className="leadership-grid">
+                  <div className="leadership-field">
+                    <label>Leads</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={localLeadership.sdr.leads}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          sdr: { ...localLeadership.sdr, leads: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>Agendamentos</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={localLeadership.sdr.agendamentos}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          sdr: { ...localLeadership.sdr, agendamentos: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>Acontecidas</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={localLeadership.sdr.acontecidas}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          sdr: { ...localLeadership.sdr, acontecidas: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>Receita</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={localLeadership.sdr.receita}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          sdr: { ...localLeadership.sdr, receita: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>Ligações WhatsApp</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={localLeadership.sdr.ligacoes_whatsapp}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          sdr: { ...localLeadership.sdr, ligacoes_whatsapp: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>Tempo em Linha (min)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={localLeadership.sdr.tempo_em_linha}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          sdr: { ...localLeadership.sdr, tempo_em_linha: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="leadership-settings-section">
+                <h3 className="leadership-section-title">Metas Closer</h3>
+                <div className="leadership-grid">
+                  <div className="leadership-field">
+                    <label>Reuniões</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.1}
+                      value={localLeadership.closer.reunioes}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          closer: { ...localLeadership.closer, reunioes: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>Contratos</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={localLeadership.closer.contratos}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          closer: { ...localLeadership.closer, contratos: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>Receita</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={localLeadership.closer.receita}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          closer: { ...localLeadership.closer, receita: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>Vendas (Qtd)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={localLeadership.closer.vendas}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          closer: { ...localLeadership.closer, vendas: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>ARR</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={localLeadership.closer.arr}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          closer: { ...localLeadership.closer, arr: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>MRR</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={localLeadership.closer.mrr}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          closer: { ...localLeadership.closer, mrr: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="leadership-field">
+                    <label>Valor Recebido</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={localLeadership.closer.valor_recebido}
+                      onChange={(e) =>
+                        setLocalLeadership({
+                          ...localLeadership,
+                          closer: { ...localLeadership.closer, valor_recebido: parseFloat(e.target.value) || 0 },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
             </>
           )}
 

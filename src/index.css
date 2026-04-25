@@ -2448,6 +2448,30 @@ input {
   max-width: 100px;
 }
 
+/* ─── Sync Banner ───────────────────────────────────────────── */
+.sync-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--accent-closer);
+  padding: 6px 12px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-sm);
+  margin-top: 8px;
+}
+
+.sync-spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* ─── Tabs Navigation ───────────────────────────────────────── */
 .tabs-navigation {
   display: flex;

@@ -120,7 +120,7 @@ export default function TotalCard(props: TotalCardProps) {
   const activeCount = allData.filter((d) => d !== null).length;
 
   return (
-    <div className="total-card">
+    <div className="total-card closer-card">
       <div className="total-card-left">
         <div className="total-card-label">Equipe Closer</div>
         <div className="total-card-title">Performance Geral</div>

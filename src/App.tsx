@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { DayData, SDRData, CloserData, SDRConfig, CloserConfig } from './types';
+import { DayData, SDRData, CloserData, SDRConfig, CloserConfig, LeadershipGoals } from './types';
 import {
   loadSDRConfigs,
   loadCloserConfigs,
@@ -7,13 +7,24 @@ import {
   saveCloserConfigs,
 } from './configStorage';
 import {
-  getDayData,
   saveDayData,
   getDateRange,
   getAggregatedData,
   applyImportRows,
   ImportRow,
 } from './storage';
+import {
+  loadLeadershipGoals,
+} from './leadershipStorage';
+import {
+  getDayDataCloud,
+  saveDayDataCloud,
+  deletePersonFromCloud,
+  syncDatesFromCloud,
+  loadLeadershipGoalsCloud,
+  saveLeadershipGoalsCloud,
+  isSupabaseConfigured,
+} from './db';
 import { todayString, formatDate, countWorkingDays } from './utils';
 
 import Header from './components/Header';
@@ -23,6 +34,8 @@ import AlertsSection from './components/AlertsSection';
 import EditModal from './components/EditModal';
 import HistoryModal from './components/HistoryModal';
 import SettingsModal from './components/SettingsModal';
+import RankingTab from './components/RankingTab';
+import PaceLiderancaTab from './components/PaceLiderancaTab';
 
 interface EditingPerson {
   id: string;
@@ -86,6 +99,7 @@ function exportToCSV(
 export default function App() {
   const [sdrConfigs, setSdrConfigs] = useState<SDRConfig[]>(() => loadSDRConfigs());
   const [closerConfigs, setCloserConfigs] = useState<CloserConfig[]>(() => loadCloserConfigs());
+  const [leadershipGoals, setLeadershipGoals] = useState<LeadershipGoals>(() => loadLeadershipGoals());
   const [startDate, setStartDate] = useState<string>(todayString());
   const [endDate, setEndDate] = useState<string>(todayString());
   const [dayData, setDayData] = useState<DayData>(getEmptyDayData(todayString()));
@@ -94,14 +108,35 @@ export default function App() {
   const [darkMode, setDarkMode] = useState<boolean>(true);
   const [showSettings, setShowSettings] = useState(false);
   const [importRefresh, setImportRefresh] = useState(0);
+  const [activeTab, setActiveTab] = useState<'pace-time' | 'ranking' | 'lideranca'>('pace-time');
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const isSingleDay = startDate === endDate;
 
+  // Carrega metas de liderança do cloud na inicialização
+  useEffect(() => {
+    loadLeadershipGoalsCloud().then((goals) => {
+      setLeadershipGoals(goals);
+    });
+  }, []);
+
   // Load single-day data for edit modal / single-day view
   useEffect(() => {
-    const stored = getDayData(startDate);
-    setDayData(stored ?? getEmptyDayData(startDate));
+    getDayDataCloud(startDate).then((stored) => {
+      setDayData(stored ?? getEmptyDayData(startDate));
+    });
   }, [startDate, importRefresh]);
+
+  // Sincroniza dados do período inteiro do Supabase quando o range muda
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const dates = getDateRange(startDate, endDate);
+    setIsSyncing(true);
+    syncDatesFromCloud(dates).then(() => {
+      setIsSyncing(false);
+      setImportRefresh((n) => n + 1);
+    });
+  }, [startDate, endDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     document.body.classList.toggle('light-mode', !darkMode);
@@ -216,7 +251,7 @@ export default function App() {
     (data: SDRData, saveDate: string = startDate) => {
       const newDayData: DayData = { ...dayData, sdrs: { ...dayData.sdrs, [data.id]: data } };
       setDayData(newDayData);
-      saveDayData(saveDate, newDayData);
+      saveDayDataCloud(saveDate, newDayData); // salva local + cloud
       setEditingPerson(null);
       setImportRefresh((n) => n + 1);
     },
@@ -227,7 +262,7 @@ export default function App() {
     (data: CloserData, saveDate: string = startDate) => {
       const newDayData: DayData = { ...dayData, closers: { ...dayData.closers, [data.id]: data } };
       setDayData(newDayData);
-      saveDayData(saveDate, newDayData);
+      saveDayDataCloud(saveDate, newDayData); // salva local + cloud
       setEditingPerson(null);
       setImportRefresh((n) => n + 1);
     },
@@ -240,7 +275,8 @@ export default function App() {
       delete newSdrs[id];
       const newDayData: DayData = { ...dayData, sdrs: newSdrs };
       setDayData(newDayData);
-      saveDayData(startDate, newDayData);
+      saveDayData(startDate, newDayData); // atualiza localStorage
+      deletePersonFromCloud(startDate, id, 'sdr'); // deleta do cloud
       setEditingPerson(null);
       setImportRefresh((n) => n + 1);
     },
@@ -253,7 +289,8 @@ export default function App() {
       delete newClosers[id];
       const newDayData: DayData = { ...dayData, closers: newClosers };
       setDayData(newDayData);
-      saveDayData(startDate, newDayData);
+      saveDayData(startDate, newDayData); // atualiza localStorage
+      deletePersonFromCloud(startDate, id, 'closer'); // deleta do cloud
       setEditingPerson(null);
       setImportRefresh((n) => n + 1);
     },
@@ -279,9 +316,13 @@ export default function App() {
 
   // ─── Settings save ────────────────────────────────────────────
   const handleSaveSettings = useCallback(
-    (newSdr: SDRConfig[], newCloser: CloserConfig[]) => {
+    (newSdr: SDRConfig[], newCloser: CloserConfig[], newLeadership?: LeadershipGoals) => {
       saveSDRConfigs(newSdr);
       saveCloserConfigs(newCloser);
+      if (newLeadership) {
+        saveLeadershipGoalsCloud(newLeadership); // salva local + cloud
+        setLeadershipGoals(newLeadership);
+      }
       setSdrConfigs(newSdr);
       setCloserConfigs(newCloser);
       setShowSettings(false);
@@ -327,6 +368,38 @@ export default function App() {
         onDarkModeToggle={() => setDarkMode((d) => !d)}
       />
 
+      {/* Sync indicator */}
+      {isSyncing && (
+        <div className="sync-banner">
+          <span className="sync-spinner">⟳</span> Sincronizando dados com a nuvem…
+        </div>
+      )}
+
+      {/* Tab Navigation */}
+      <div className="tabs-navigation">
+        <button
+          className={`tab-button ${activeTab === 'pace-time' ? 'active' : ''}`}
+          onClick={() => setActiveTab('pace-time')}
+        >
+          Pace Time
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'ranking' ? 'active' : ''}`}
+          onClick={() => setActiveTab('ranking')}
+        >
+          Ranking Comercial
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'lideranca' ? 'active' : ''}`}
+          onClick={() => setActiveTab('lideranca')}
+        >
+          Pace Da Liderança
+        </button>
+      </div>
+
+      {/* PACE TIME Tab Content */}
+      {activeTab === 'pace-time' && (
+        <>
       <AlertsSection
         sdrData={effectiveSDRData}
         sdrConfigs={periodSDRConfigs}
@@ -434,6 +507,31 @@ export default function App() {
           ))}
         </div>
       </section>
+        </>
+      )}
+
+      {/* RANKING COMERCIAL Tab Content */}
+      {activeTab === 'ranking' && (
+        <div className="tab-content">
+          <RankingTab
+            sdrConfigs={sdrConfigs}
+            closerConfigs={closerConfigs}
+            sdrDataArray={effectiveSDRData}
+            closerDataArray={effectiveCloserData}
+          />
+        </div>
+      )}
+
+      {/* PACE DA LIDERANÇA Tab Content */}
+      {activeTab === 'lideranca' && (
+        <div className="tab-content">
+          <PaceLiderancaTab
+            sdrData={effectiveSDRData}
+            closerData={effectiveCloserData}
+            leadershipGoals={leadershipGoals}
+          />
+        </div>
+      )}
 
       {/* Edit Modal — SDR */}
       {editingPerson?.type === 'sdr' && editingSDRConfig && (
@@ -476,6 +574,7 @@ export default function App() {
         <SettingsModal
           sdrConfigs={sdrConfigs}
           closerConfigs={closerConfigs}
+          leadershipGoals={leadershipGoals}
           onSave={handleSaveSettings}
           onClose={() => setShowSettings(false)}
           onExportCSV={handleExportCSV}

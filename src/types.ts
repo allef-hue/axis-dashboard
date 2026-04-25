@@ -16,6 +16,10 @@ export interface CloserData {
   reunioes: number;
   contratos: number;
   receita: number; // Receita gerada/paga pelo Closer
+  vendas?: number; // Quantidade de vendas
+  arr?: number; // Annual Recurring Revenue
+  mrr?: number; // Monthly Recurring Revenue
+  valor_recebido?: number; // Valor recebido
   updatedAt: string;
 }
 
@@ -49,5 +53,25 @@ export interface CloserConfig {
     reunioes: number;
     contratos: number;
     receita: number; // Meta mensal
+  };
+}
+
+export interface LeadershipGoals {
+  sdr: {
+    leads: number;
+    agendamentos: number;
+    acontecidas: number;
+    receita: number;
+    ligacoes_whatsapp: number;
+    tempo_em_linha: number;
+  };
+  closer: {
+    reunioes: number;
+    contratos: number;
+    receita: number;
+    vendas: number;
+    arr: number;
+    mrr: number;
+    valor_recebido: number;
   };
 }
