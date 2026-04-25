@@ -25,6 +25,7 @@ import {
   saveLeadershipGoalsCloud,
   isSupabaseConfigured,
 } from './db';
+import { setupRealtimeSubscriptions } from './realtime';
 import { todayString, formatDate, countWorkingDays } from './utils';
 
 import Header from './components/Header';
@@ -119,6 +120,40 @@ export default function App() {
       setLeadershipGoals(goals);
     });
   }, []);
+
+  // Setup Realtime subscriptions para sincronização em tempo real
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      console.log('[App] Supabase não configurado, realtime desabilitado');
+      return;
+    }
+
+    console.log('[App] Configurando Realtime subscriptions...');
+
+    const handleDataChange = (date: string, newDayData: DayData) => {
+      console.log('[App] onDataChange notificado para', date);
+      // Se o usuário está vendo essa data, atualiza
+      if (date === startDate) {
+        setDayData(newDayData);
+      }
+      // Sempre atualiza o importRefresh para recalcular dados agregados
+      setImportRefresh((n) => n + 1);
+    };
+
+    const handleGoalsChange = (newGoals: LeadershipGoals) => {
+      console.log('[App] onGoalsChange notificado');
+      setLeadershipGoals(newGoals);
+    };
+
+    // Setup e retorna cleanup function
+    const cleanup = setupRealtimeSubscriptions(handleDataChange, handleGoalsChange);
+
+    // Cleanup ao desmontar
+    return () => {
+      console.log('[App] Limpando Realtime subscriptions...');
+      cleanup();
+    };
+  }, [startDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load single-day data for edit modal / single-day view
   useEffect(() => {
