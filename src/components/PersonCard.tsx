@@ -170,6 +170,26 @@ export default function PersonCard(props: PersonCardProps) {
         />
       </div>
 
+      {/* Additional metrics without metas */}
+      <div className="card-additional-metrics">
+        <div className="metric-simple">
+          <span className="metric-simple-label">Vendas</span>
+          <span className="metric-simple-value">{Math.round(eff.vendas ?? 0)}</span>
+        </div>
+        <div className="metric-simple">
+          <span className="metric-simple-label">ARR</span>
+          <span className="metric-simple-value">{formatCurrency(eff.arr ?? 0)}</span>
+        </div>
+        <div className="metric-simple">
+          <span className="metric-simple-label">MRR</span>
+          <span className="metric-simple-value">{formatCurrency(eff.mrr ?? 0)}</span>
+        </div>
+        <div className="metric-simple">
+          <span className="metric-simple-label">Valor Recebido</span>
+          <span className="metric-simple-value">{formatCurrency(eff.valor_recebido ?? 0)}</span>
+        </div>
+      </div>
+
       {isPeriodView && monthlyConfig && (
         <div className="card-gap-row">
           <div className="gap-label">Gap vs. Esperado:</div>
