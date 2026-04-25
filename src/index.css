@@ -2693,3 +2693,58 @@ input {
 .ranking-table tbody tr:nth-child(3) {
   background: rgba(205, 127, 50, 0.06);
 }
+
+/* ─── Person Filter ──────────────────────────────────────────── */
+.person-filter-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  margin: 0 0 24px 0;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.person-filter-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 90px;
+}
+
+.person-filter-select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  min-width: 220px;
+}
+
+.person-filter-select:hover {
+  border-color: var(--primary);
+  background: var(--bg);
+}
+
+.person-filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(255, 77, 0, 0.1);
+}
+
+.person-filter-select optgroup {
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.person-filter-select option {
+  padding: 8px;
+  background: var(--bg);
+  color: var(--text);
+}

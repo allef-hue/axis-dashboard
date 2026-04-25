@@ -111,6 +111,7 @@ export default function App() {
   const [importRefresh, setImportRefresh] = useState(0);
   const [activeTab, setActiveTab] = useState<'pace-time' | 'ranking' | 'lideranca'>('pace-time');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
 
   const isSingleDay = startDate === endDate;
 
@@ -267,6 +268,29 @@ export default function App() {
   // Para compatibilidade com componentes existentes
   const periodSDRConfigs: SDRConfig[] = expectedSDRConfigs;
   const periodCloserConfigs: CloserConfig[] = expectedCloserConfigs;
+
+  // ─── Filtro de pessoa (selectedPersonId) ──────────────────────
+  const filteredSDRConfigs = useMemo(() => {
+    if (!selectedPersonId) return periodSDRConfigs;
+    return periodSDRConfigs.filter(cfg => cfg.id === selectedPersonId);
+  }, [periodSDRConfigs, selectedPersonId]);
+
+  const filteredCloserConfigs = useMemo(() => {
+    if (!selectedPersonId) return periodCloserConfigs;
+    return periodCloserConfigs.filter(cfg => cfg.id === selectedPersonId);
+  }, [periodCloserConfigs, selectedPersonId]);
+
+  const filteredSDRData = useMemo(() => {
+    if (!selectedPersonId) return effectiveSDRData;
+    const idx = periodSDRConfigs.findIndex(cfg => cfg.id === selectedPersonId);
+    return idx >= 0 ? [effectiveSDRData[idx]] : [];
+  }, [effectiveSDRData, periodSDRConfigs, selectedPersonId]);
+
+  const filteredCloserData = useMemo(() => {
+    if (!selectedPersonId) return effectiveCloserData;
+    const idx = periodCloserConfigs.findIndex(cfg => cfg.id === selectedPersonId);
+    return idx >= 0 ? [effectiveCloserData[idx]] : [];
+  }, [effectiveCloserData, periodCloserConfigs, selectedPersonId]);
 
   // ─── Period label ─────────────────────────────────────────────
   const periodLabel = useMemo(() => {
@@ -477,6 +501,28 @@ export default function App() {
         </div>
       )}
 
+      {/* Filtro de Pessoa */}
+      <div className="person-filter-container">
+        <label className="person-filter-label">Visualizar:</label>
+        <select
+          className="person-filter-select"
+          value={selectedPersonId || ''}
+          onChange={(e) => setSelectedPersonId(e.target.value || null)}
+        >
+          <option value="">Todas as Pessoas</option>
+          <optgroup label="SDRs">
+            {sdrConfigs.map(cfg => (
+              <option key={cfg.id} value={cfg.id}>{cfg.nome}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Closers">
+            {closerConfigs.map(cfg => (
+              <option key={cfg.id} value={cfg.id}>{cfg.nome}</option>
+            ))}
+          </optgroup>
+        </select>
+      </div>
+
       {/* Performance Overview Section */}
       <section className="performance-overview-section">
         <div className="performance-cards-grid">
@@ -501,21 +547,21 @@ export default function App() {
       <section className="sdr-section">
         <div className="section-title">
           Equipe SDR
-          <span className="section-label">{sdrConfigs.length} pessoa{sdrConfigs.length !== 1 ? 's' : ''}</span>
+          <span className="section-label">{filteredSDRConfigs.length} pessoa{filteredSDRConfigs.length !== 1 ? 's' : ''}</span>
         </div>
         <div className="sdr-grid">
-          {sdrConfigs.map((cfg, i) => (
+          {filteredSDRConfigs.map((cfg, i) => (
             <PersonCard
-              key={cfg.id}
-              type="sdr"
-              config={expectedSDRConfigs[i]}
-              monthlyConfig={sdrConfigs[i]}
-              data={effectiveSDRData[i]}
-              isPeriodView={isPeriodView}
-              daysWithData={aggregated?.sdrs[cfg.id]?.daysWithData}
-              onEdit={() => handleEditPerson(cfg.id, 'sdr')}
-              onHistory={() => setHistoryPerson({ id: cfg.id, type: 'sdr' })}
-            />
+                key={cfg.id}
+                type="sdr"
+                config={cfg}
+                monthlyConfig={sdrConfigs.find(c => c.id === cfg.id)!}
+                data={filteredSDRData[i]}
+                isPeriodView={isPeriodView}
+                daysWithData={aggregated?.sdrs[cfg.id]?.daysWithData}
+                onEdit={() => handleEditPerson(cfg.id, 'sdr')}
+                onHistory={() => setHistoryPerson({ id: cfg.id, type: 'sdr' })}
+              />
           ))}
         </div>
       </section>
@@ -524,21 +570,21 @@ export default function App() {
       <section className="closer-section">
         <div className="section-title">
           Equipe Closer
-          <span className="section-label">{closerConfigs.length} pessoa{closerConfigs.length !== 1 ? 's' : ''}</span>
+          <span className="section-label">{filteredCloserConfigs.length} pessoa{filteredCloserConfigs.length !== 1 ? 's' : ''}</span>
         </div>
         <div className="closer-grid">
-          {closerConfigs.map((cfg, i) => (
+          {filteredCloserConfigs.map((cfg, i) => (
             <PersonCard
-              key={cfg.id}
-              type="closer"
-              config={expectedCloserConfigs[i]}
-              monthlyConfig={closerConfigs[i]}
-              data={effectiveCloserData[i]}
-              isPeriodView={isPeriodView}
-              daysWithData={aggregated?.closers[cfg.id]?.daysWithData}
-              onEdit={() => handleEditPerson(cfg.id, 'closer')}
-              onHistory={() => setHistoryPerson({ id: cfg.id, type: 'closer' })}
-            />
+                key={cfg.id}
+                type="closer"
+                config={cfg}
+                monthlyConfig={closerConfigs.find(c => c.id === cfg.id)!}
+                data={filteredCloserData[i]}
+                isPeriodView={isPeriodView}
+                daysWithData={aggregated?.closers[cfg.id]?.daysWithData}
+                onEdit={() => handleEditPerson(cfg.id, 'closer')}
+                onHistory={() => setHistoryPerson({ id: cfg.id, type: 'closer' })}
+              />
           ))}
         </div>
       </section>
