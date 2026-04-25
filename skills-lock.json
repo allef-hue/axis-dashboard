@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "backend-to-frontend-handoff-docs": {
+      "source": "davila7/claude-code-templates",
+      "sourceType": "github",
+      "computedHash": "d8c8af8cf6219c60b8cfc6da908dbe70e8aa7c387cef13bb490118ac493b5efd"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
