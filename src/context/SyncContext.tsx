@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 
 export interface SyncStatus {
   state: 'idle' | 'syncing' | 'success' | 'error';
@@ -64,6 +64,11 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       lastSyncTime: null,
     });
   }, []);
+
+  // Register callbacks globally for db.ts to use
+  useEffect(() => {
+    setSyncCallbacks({ status, setSyncing, setSuccess, setError, setIdle });
+  }, [status, setSyncing, setSuccess, setError, setIdle]);
 
   return (
     <SyncContext.Provider value={{ status, setSyncing, setSuccess, setError, setIdle }}>
