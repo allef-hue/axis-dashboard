@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { getAuditHistory, AuditEntry } from '../db';
 import { formatTime, formatDate } from '../utils';
+import { supabase } from '../supabase';
 
 interface AuditHistoryModalProps {
   personId: string;
@@ -24,10 +25,42 @@ export default function AuditHistoryModal({
 }: AuditHistoryModalProps) {
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [newEntryNotification, setNewEntryNotification] = useState(false);
 
   useEffect(() => {
     loadAuditHistory();
   }, [personId, startDate, endDate]);
+
+  // Subscribe to real-time changes
+  useEffect(() => {
+    if (!supabase) return;
+
+    const channel = supabase
+      .channel(`audit_${personId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'audit_log',
+          filter: `record_id=like.%${personId}%`,
+        },
+        (payload) => {
+          // Novo registro de auditoria chegou em tempo real
+          const newEntry = payload.new as AuditEntry;
+          setEntries((prev) => [newEntry, ...prev]);
+
+          // Mostrar notificação
+          setNewEntryNotification(true);
+          setTimeout(() => setNewEntryNotification(false), 4000);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [personId]);
 
   async function loadAuditHistory() {
     setLoading(true);
@@ -88,6 +121,13 @@ export default function AuditHistoryModal({
           <p className="modal-subtitle">{personName}</p>
           <button className="modal-close" onClick={onClose}>✕</button>
         </div>
+
+        {/* Real-time Notification */}
+        {newEntryNotification && (
+          <div className="audit-notification">
+            ✨ Nova alteração detectada!
+          </div>
+        )}
 
         {/* Content */}
         <div className="modal-body audit-history">
@@ -180,6 +220,28 @@ export default function AuditHistoryModal({
       </div>
 
       <style>{`
+        .audit-notification {
+          background: linear-gradient(135deg, rgba(76, 175, 80, 0.95), rgba(56, 142, 60, 0.95));
+          color: white;
+          padding: 0.75rem 1rem;
+          text-align: center;
+          font-weight: 600;
+          font-size: 0.9rem;
+          border-bottom: 2px solid var(--success);
+          animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
         .audit-modal {
           max-width: 700px;
           max-height: 80vh;
