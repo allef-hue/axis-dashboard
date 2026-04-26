@@ -2,6 +2,8 @@ import { SDRData, CloserData, SDRConfig, CloserConfig } from '../types';
 import { formatCurrency } from '../utils';
 import ProgressBar from './ProgressBar';
 
+// Force rebuild - includes MRR/ARR totals for Closer Performance Geral (v2)
+
 
 interface TotalCardSDR {
   type: 'sdr';
