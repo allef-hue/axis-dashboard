@@ -5,10 +5,13 @@
  *  - Leitura inicial: busca do Supabase → armazena no localStorage como cache
  *  - Escrita: salva no localStorage (imediato) + Supabase (async em background)
  *  - Se Supabase não estiver configurado: usa só localStorage
+ *
+ * Configs (SDR/Closer) são armazenadas DENTRO do registro leadership_goals
+ * no campo sdrConfigs/closerConfigs — assim ficam sincronizadas automaticamente.
  */
 
 import { supabase, isSupabaseConfigured } from './supabase';
-import { DayData, LeadershipGoals } from './types';
+import { DayData, LeadershipGoals, SDRConfig, CloserConfig } from './types';
 import {
   getDayData as localGet,
   saveDayData as localSave,
@@ -17,6 +20,12 @@ import {
   loadLeadershipGoals as localLoadGoals,
   saveLeadershipGoals as localSaveGoals,
 } from './leadershipStorage';
+import {
+  loadSDRConfigs as localLoadSDRConfigs,
+  loadCloserConfigs as localLoadCloserConfigs,
+  saveSDRConfigs as localSaveSDRConfigs,
+  saveCloserConfigs as localSaveCloserConfigs,
+} from './configStorage';
 
 // ─── Day Data ──────────────────────────────────────────────────
 
@@ -168,6 +177,10 @@ export async function getDayDataCloud(date: string): Promise<DayData | null> {
 
 // ─── Leadership Goals ──────────────────────────────────────────
 
+/**
+ * Carrega goals + configs do time do Supabase.
+ * As configs ficam armazenadas dentro do mesmo JSON de goals.
+ */
 export async function loadLeadershipGoalsCloud(): Promise<LeadershipGoals> {
   if (!isSupabaseConfigured || !supabase) {
     return localLoadGoals();
@@ -186,6 +199,17 @@ export async function loadLeadershipGoalsCloud(): Promise<LeadershipGoals> {
 
     const goals = data.goals as LeadershipGoals;
     localSaveGoals(goals);
+
+    // Sincronizar configs do time se presentes no cloud
+    if (Array.isArray(goals.sdrConfigs) && goals.sdrConfigs.length > 0) {
+      localSaveSDRConfigs(goals.sdrConfigs);
+      console.log('[DB] SDR configs sincronizadas do cloud:', goals.sdrConfigs.length);
+    }
+    if (Array.isArray(goals.closerConfigs) && goals.closerConfigs.length > 0) {
+      localSaveCloserConfigs(goals.closerConfigs);
+      console.log('[DB] Closer configs sincronizadas do cloud:', goals.closerConfigs.length);
+    }
+
     return goals;
   } catch (e) {
     console.error('[DB] loadLeadershipGoalsCloud falhou:', e);
@@ -193,10 +217,21 @@ export async function loadLeadershipGoalsCloud(): Promise<LeadershipGoals> {
   }
 }
 
+/**
+ * Salva goals + configs do time no Supabase.
+ * Inclui automaticamente as configs atuais do localStorage.
+ */
 export async function saveLeadershipGoalsCloud(goals: LeadershipGoals): Promise<void> {
   localSaveGoals(goals);
 
   if (!isSupabaseConfigured || !supabase) return;
+
+  // Incluir configs do time no payload para sincronizar com todos
+  const payload: LeadershipGoals = {
+    ...goals,
+    sdrConfigs: goals.sdrConfigs ?? localLoadSDRConfigs(),
+    closerConfigs: goals.closerConfigs ?? localLoadCloserConfigs(),
+  };
 
   try {
     const { data: existing } = await supabase
@@ -208,15 +243,174 @@ export async function saveLeadershipGoalsCloud(goals: LeadershipGoals): Promise<
     if (existing?.id) {
       await supabase
         .from('leadership_goals')
-        .update({ goals, updated_at: new Date().toISOString() })
+        .update({ goals: payload, updated_at: new Date().toISOString() })
         .eq('id', existing.id);
     } else {
       await supabase
         .from('leadership_goals')
-        .insert({ goals, updated_at: new Date().toISOString() });
+        .insert({ goals: payload, updated_at: new Date().toISOString() });
     }
+    console.log('[DB] Goals + configs salvas no cloud');
   } catch (e) {
     console.error('[DB] saveLeadershipGoalsCloud falhou:', e);
+  }
+}
+
+/**
+ * Salva as configs do time (SDR + Closer) no Supabase junto com os goals existentes.
+ * Chame sempre que as configs forem alteradas nas Configurações.
+ */
+export async function saveConfigsCloud(
+  sdrConfigs: SDRConfig[],
+  closerConfigs: CloserConfig[]
+): Promise<void> {
+  // Salvar localmente primeiro (resposta imediata)
+  localSaveSDRConfigs(sdrConfigs);
+  localSaveCloserConfigs(closerConfigs);
+
+  if (!isSupabaseConfigured || !supabase) return;
+
+  try {
+    // Buscar goals existentes para não perder dados
+    const { data: existing } = await supabase
+      .from('leadership_goals')
+      .select('*')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const currentGoals = (existing?.goals as LeadershipGoals) ?? localLoadGoals();
+    const payload: LeadershipGoals = {
+      ...currentGoals,
+      sdrConfigs,
+      closerConfigs,
+    };
+
+    if (existing?.id) {
+      await supabase
+        .from('leadership_goals')
+        .update({ goals: payload, updated_at: new Date().toISOString() })
+        .eq('id', existing.id);
+    } else {
+      await supabase
+        .from('leadership_goals')
+        .insert({ goals: payload, updated_at: new Date().toISOString() });
+    }
+    console.log('[DB] Configs do time salvas no cloud');
+  } catch (e) {
+    console.error('[DB] saveConfigsCloud falhou:', e);
+  }
+}
+
+// ─── AUDITORIA ──────────────────────────────────────────────────
+
+/**
+ * Interface para representar um log de auditoria
+ */
+export interface AuditEntry {
+  id: string;
+  table_name: string;
+  operation: 'INSERT' | 'UPDATE' | 'DELETE';
+  record_id: string;
+  user_email?: string;
+  changed_at: string;
+  old_values?: Record<string, unknown>;
+  new_values?: Record<string, unknown>;
+}
+
+/**
+ * Busca o histórico de alterações para uma pessoa em um período
+ * @param personId ID da pessoa (ex: 'joao_silva')
+ * @param startDate Data inicial (YYYY-MM-DD)
+ * @param endDate Data final (YYYY-MM-DD)
+ */
+export async function getAuditHistory(
+  personId: string,
+  startDate?: string,
+  endDate?: string
+): Promise<AuditEntry[]> {
+  if (!isSupabaseConfigured || !supabase) return [];
+
+  try {
+    let query = supabase
+      .from('audit_log')
+      .select('*')
+      .like('record_id', `%${personId}%`)
+      .order('changed_at', { ascending: false });
+
+    if (startDate) {
+      query = query.gte('changed_at', `${startDate}T00:00:00`);
+    }
+
+    if (endDate) {
+      query = query.lte('changed_at', `${endDate}T23:59:59`);
+    }
+
+    const { data, error } = await query.limit(500);
+
+    if (error) {
+      console.error('[Audit] Erro ao buscar histórico:', error.message);
+      return [];
+    }
+
+    return data || [];
+  } catch (e) {
+    console.error('[Audit] getAuditHistory falhou:', e);
+    return [];
+  }
+}
+
+/**
+ * Busca o histórico de um dia específico para todos
+ */
+export async function getAuditHistoryByDate(date: string): Promise<AuditEntry[]> {
+  if (!isSupabaseConfigured || !supabase) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from('audit_log')
+      .select('*')
+      .like('record_id', `${date}|%`)
+      .order('changed_at', { ascending: false });
+
+    if (error) {
+      console.error('[Audit] Erro ao buscar histórico do dia:', error.message);
+      return [];
+    }
+
+    return data || [];
+  } catch (e) {
+    console.error('[Audit] getAuditHistoryByDate falhou:', e);
+    return [];
+  }
+}
+
+/**
+ * Busca quem alterou nos últimos N dias
+ */
+export async function getRecentChanges(days: number = 7): Promise<AuditEntry[]> {
+  if (!isSupabaseConfigured || !supabase) return [];
+
+  try {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const { data, error } = await supabase
+      .from('audit_log')
+      .select('*')
+      .gte('changed_at', startDate.toISOString())
+      .order('changed_at', { ascending: false })
+      .limit(500);
+
+    if (error) {
+      console.error('[Audit] Erro ao buscar mudanças recentes:', error.message);
+      return [];
+    }
+
+    return data || [];
+  } catch (e) {
+    console.error('[Audit] getRecentChanges falhou:', e);
+    return [];
   }
 }
 
