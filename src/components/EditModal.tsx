@@ -198,7 +198,17 @@ export default function EditModal(props: EditModalProps) {
               {type === 'sdr' ? 'SDR' : 'Closer'} · Meu Pace
             </div>
           </div>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              className="btn-save"
+              onClick={handleSave}
+              disabled={!isValid}
+              style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+            >
+              Salvar ✓
+            </button>
+            <button className="modal-close" onClick={onClose}>✕</button>
+          </div>
         </div>
 
         <div className="modal-date-selector">
