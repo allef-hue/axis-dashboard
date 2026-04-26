@@ -163,11 +163,11 @@ export default function TotalCard(props: TotalCardProps) {
         />
         <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '3rem' }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>💰 MRR</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>MRR</div>
             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text)', lineHeight: '1.2' }}>{formatCurrency(totals.mrr || 0)}</div>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📈 ARR</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>ARR</div>
             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text)', lineHeight: '1.2' }}>{formatCurrency(totals.arr || 0)}</div>
           </div>
         </div>

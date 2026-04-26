@@ -87,9 +87,15 @@ export default function PersonCard(props: PersonCardProps) {
           <ProgressBar value={eff.agendamentos} max={cfg.metas.agendamentos} label="Agendamentos" />
           <ProgressBar value={eff.acontecidas} max={cfg.metas.acontecidas} label="Acontecidas" />
           <ProgressBar
+            value={eff.rqa ?? 0}
+            max={cfg.metas.rqa ?? 10}
+            label="RQA"
+            formatValue={(v) => v.toFixed(1)}
+          />
+          <ProgressBar
             value={eff.receita}
             max={cfg.metas.receita}
-            label="Receita Originada"
+            label="Pago"
             formatValue={formatCurrency}
             isCurrency
           />
@@ -107,6 +113,9 @@ export default function PersonCard(props: PersonCardProps) {
               </span>
               <span className={`gap-item ${eff.acontecidas - cfg.metas.acontecidas >= 0 ? 'gap-positive' : 'gap-negative'}`}>
                 {eff.acontecidas - cfg.metas.acontecidas >= 0 ? '+' : ''}{Math.round(eff.acontecidas - cfg.metas.acontecidas)} Acont.
+              </span>
+              <span className={`gap-item ${(eff.rqa ?? 0) - (cfg.metas.rqa ?? 10) >= 0 ? 'gap-positive' : 'gap-negative'}`}>
+                {(eff.rqa ?? 0) - (cfg.metas.rqa ?? 10) >= 0 ? '+' : ''}{((eff.rqa ?? 0) - (cfg.metas.rqa ?? 10)).toFixed(1)} RQA
               </span>
             </div>
           </div>
@@ -160,34 +169,20 @@ export default function PersonCard(props: PersonCardProps) {
       </div>
 
       <div className="card-metrics">
-        <ProgressBar value={eff.reunioes} max={cfg.metas.reunioes} label="Reuniões" formatValue={(v) => v.toFixed(1)} />
-        <ProgressBar value={eff.contratos} max={cfg.metas.contratos} label="Contratos" formatValue={(v) => v.toFixed(2)} />
-        <ProgressBar
-          value={eff.receita}
-          max={cfg.metas.receita}
-          label="Receita Paga"
-          formatValue={formatCurrency}
-          isCurrency
-        />
+        <ProgressBar value={eff.reunioes} max={cfg.metas.reunioes} label="Reunião Acontecida" formatValue={(v) => v.toFixed(1)} />
+        <ProgressBar value={eff.proposta ?? 0} max={cfg.metas.proposta ?? 1.5} label="Proposta" formatValue={(v) => v.toFixed(1)} />
+        <ProgressBar value={eff.contratos} max={cfg.metas.contratos} label="Contrato Assinado" formatValue={(v) => v.toFixed(2)} />
       </div>
 
       {/* Additional metrics without metas */}
       <div className="card-additional-metrics">
         <div className="metric-simple">
-          <span className="metric-simple-label">Vendas</span>
-          <span className="metric-simple-value">{Math.round(eff.vendas ?? 0)}</span>
-        </div>
-        <div className="metric-simple">
-          <span className="metric-simple-label">ARR</span>
-          <span className="metric-simple-value">{formatCurrency(eff.arr ?? 0)}</span>
-        </div>
-        <div className="metric-simple">
           <span className="metric-simple-label">MRR</span>
           <span className="metric-simple-value">{formatCurrency(eff.mrr ?? 0)}</span>
         </div>
         <div className="metric-simple">
-          <span className="metric-simple-label">Valor Recebido</span>
-          <span className="metric-simple-value">{formatCurrency(eff.valor_recebido ?? 0)}</span>
+          <span className="metric-simple-label">ARR</span>
+          <span className="metric-simple-value">{formatCurrency(eff.arr ?? 0)}</span>
         </div>
       </div>
 
@@ -197,6 +192,9 @@ export default function PersonCard(props: PersonCardProps) {
           <div className="gap-metrics">
             <span className={`gap-item ${eff.reunioes - cfg.metas.reunioes >= 0 ? 'gap-positive' : 'gap-negative'}`}>
               {eff.reunioes - cfg.metas.reunioes >= 0 ? '+' : ''}{(eff.reunioes - cfg.metas.reunioes).toFixed(1)} Reun.
+            </span>
+            <span className={`gap-item ${(eff.proposta ?? 0) - (cfg.metas.proposta ?? 1.5) >= 0 ? 'gap-positive' : 'gap-negative'}`}>
+              {(eff.proposta ?? 0) - (cfg.metas.proposta ?? 1.5) >= 0 ? '+' : ''}{((eff.proposta ?? 0) - (cfg.metas.proposta ?? 1.5)).toFixed(1)} Prop.
             </span>
             <span className={`gap-item ${eff.contratos - cfg.metas.contratos >= 0 ? 'gap-positive' : 'gap-negative'}`}>
               {eff.contratos - cfg.metas.contratos >= 0 ? '+' : ''}{(eff.contratos - cfg.metas.contratos).toFixed(2)} Contr.

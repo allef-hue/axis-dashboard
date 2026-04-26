@@ -14,31 +14,31 @@ export const SDR_CONFIGS: SDRConfig[] = [
     id: 'joao_silva',
     nome: 'João da Silva',
     diasUteis: 22,
-    metas: { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000 },
+    metas: { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000, rqa: 10 },
   },
   {
     id: 'rudhero',
     nome: 'Rudhero',
     diasUteis: 22,
-    metas: { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000 },
+    metas: { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000, rqa: 10 },
   },
   {
     id: 'nicolas',
     nome: 'Nicolas',
     diasUteis: 22,
-    metas: { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000 },
+    metas: { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000, rqa: 10 },
   },
   {
     id: 'bruno_nobre',
     nome: 'Bruno Nobre',
     diasUteis: 22,
-    metas: { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000 },
+    metas: { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000, rqa: 10 },
   },
   {
     id: 'caua',
     nome: 'Cauã',
     diasUteis: 22,
-    metas: { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000 },
+    metas: { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000, rqa: 10 },
   },
 ];
 
@@ -47,19 +47,19 @@ export const CLOSER_CONFIGS: CloserConfig[] = [
     id: 'eliel',
     nome: 'Eliel',
     diasUteis: 22,
-    metas: { reunioes: 3.5, contratos: 0.58, receita: 1583.88 },
+    metas: { reunioes: 3.5, proposta: 1.5, contratos: 0.58, receita: 1583.88, mrr: 0, arr: 0 },
   },
   {
     id: 'gabriel_cinato',
     nome: 'Gabriel Cinato',
     diasUteis: 22,
-    metas: { reunioes: 3.5, contratos: 0.58, receita: 1583.88 },
+    metas: { reunioes: 3.5, proposta: 1.5, contratos: 0.58, receita: 1583.88, mrr: 0, arr: 0 },
   },
   {
     id: 'bruno_levy',
     nome: 'Bruno Levy',
     diasUteis: 22,
-    metas: { reunioes: 3.5, contratos: 0.58, receita: 1583.88 },
+    metas: { reunioes: 3.5, proposta: 1.5, contratos: 0.58, receita: 1583.88, mrr: 0, arr: 0 },
   },
 ];
 

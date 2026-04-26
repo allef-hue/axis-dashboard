@@ -3760,3 +3760,114 @@ input {
   border-color: #ef4444;
   color: #ef4444;
 }
+
+/* ─── Sync Indicator ───────────────────────────────────────── */
+
+.sync-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  position: relative;
+  cursor: default;
+}
+
+.sync-icon {
+  width: 20px;
+  height: 20px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--text);
+}
+
+.sync-icon--syncing {
+  color: var(--warning);
+  animation: spin 1s linear infinite;
+}
+
+.sync-icon--success {
+  color: var(--success);
+  animation: fadeOut 2s ease-in-out forwards;
+}
+
+.sync-icon--error {
+  color: var(--danger);
+  cursor: pointer;
+}
+
+.sync-icon--error:hover {
+  filter: brightness(1.2);
+}
+
+/* Spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fade out animation for success state */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Tooltip styles */
+.sync-tooltip {
+  position: absolute;
+  bottom: -100px;
+  right: -50px;
+  background: var(--card);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: var(--text);
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+  z-index: 100;
+  pointer-events: none;
+  animation: slideUp 0.2s ease;
+}
+
+.sync-tooltip-title {
+  font-weight: 600;
+  color: var(--danger);
+  margin-bottom: 4px;
+}
+
+.sync-tooltip-message {
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  max-width: 200px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.sync-tooltip-hint {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

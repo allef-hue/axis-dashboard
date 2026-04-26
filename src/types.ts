@@ -7,6 +7,7 @@ export interface SDRData {
   receita: number; // Receita originada (das reuniões agendadas pelo SDR)
   ligacoes_whatsapp: number; // Ligações pelo WhatsApp
   tempo_em_linha: number; // Tempo em linha (minutos)
+  rqa?: number; // RQA - Requisição de Qualificação do Agendamento
   updatedAt: string;
 }
 
@@ -14,6 +15,7 @@ export interface CloserData {
   id: string;
   nome: string;
   reunioes: number;
+  proposta?: number; // Propostas enviadas
   contratos: number;
   receita: number; // Receita gerada/paga pelo Closer
   vendas?: number; // Quantidade de vendas
@@ -42,6 +44,7 @@ export interface SDRConfig {
     receita: number; // Meta mensal
     ligacoes_whatsapp: number; // Meta mensal
     tempo_em_linha: number; // Meta mensal em minutos
+    rqa?: number; // Meta mensal de RQA
   };
 }
 
@@ -51,8 +54,11 @@ export interface CloserConfig {
   diasUteis: number; // Dias úteis no mês
   metas: {
     reunioes: number;
+    proposta?: number; // Meta mensal de propostas
     contratos: number;
     receita: number; // Meta mensal
+    mrr?: number; // Meta mensal de MRR
+    arr?: number; // Meta mensal de ARR
   };
 }
 
@@ -74,4 +80,7 @@ export interface LeadershipGoals {
     mrr: number;
     valor_recebido: number;
   };
+  // Configs do time — sincronizadas via Supabase junto com as metas
+  sdrConfigs?: SDRConfig[];
+  closerConfigs?: CloserConfig[];
 }

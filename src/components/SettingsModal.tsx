@@ -81,7 +81,7 @@ export default function SettingsModal({
     setLocalSdr((prev) => prev.filter((_, idx) => idx !== i));
 
   const addSdr = () => {
-    const baseMetas = localSdr[0]?.metas ?? { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000 };
+    const baseMetas = localSdr[0]?.metas ?? { leads: 44, agendamentos: 3, acontecidas: 2, receita: 950.33, ligacoes_whatsapp: 200, tempo_em_linha: 3000, rqa: 10 };
     const diasUteis = localSdr[0]?.diasUteis ?? 22;
     setLocalSdr((prev) => [
       ...prev,
@@ -104,7 +104,7 @@ export default function SettingsModal({
     setLocalCloser((prev) => prev.filter((_, idx) => idx !== i));
 
   const addCloser = () => {
-    const baseMetas = localCloser[0]?.metas ?? { reunioes: 3.5, contratos: 0.58, receita: 1583.88 };
+    const baseMetas = localCloser[0]?.metas ?? { reunioes: 3.5, proposta: 1.5, contratos: 0.58, receita: 1583.88, mrr: 0, arr: 0 };
     const diasUteis = localCloser[0]?.diasUteis ?? 22;
     setLocalCloser((prev) => [
       ...prev,
@@ -349,7 +349,8 @@ export default function SettingsModal({
                   <span className="st-col-meta">Leads</span>
                   <span className="st-col-meta">Agend.</span>
                   <span className="st-col-meta">Acont.</span>
-                  <span className="st-col-meta">Receita</span>
+                  <span className="st-col-meta">RQA</span>
+                  <span className="st-col-meta">Pago</span>
                   <span className="st-col-meta">Lig. WA</span>
                   <span className="st-col-meta">Tempo</span>
                   <span className="st-col-action" />
@@ -386,6 +387,15 @@ export default function SettingsModal({
                       step={1}
                       value={cfg.metas.acontecidas}
                       onChange={(e) => updateSdrMeta(i, 'acontecidas', e.target.value)}
+                    />
+                    <input
+                      className="st-input st-col-meta"
+                      type="number"
+                      min={0}
+                      step={0.1}
+                      value={cfg.metas.rqa ?? 10}
+                      onChange={(e) => updateSdrMeta(i, 'rqa', e.target.value)}
+                      title="RQA - Requisição de Qualificação do Agendamento"
                     />
                     <input
                       className="st-input st-col-meta"
@@ -454,8 +464,10 @@ export default function SettingsModal({
                 <div className="settings-table-head">
                   <span className="st-col-name">Nome</span>
                   <span className="st-col-meta">Reuniões</span>
+                  <span className="st-col-meta">Proposta</span>
                   <span className="st-col-meta">Contratos</span>
-                  <span className="st-col-wide">Receita (R$)</span>
+                  <span className="st-col-meta">MRR</span>
+                  <span className="st-col-meta">ARR</span>
                   <span className="st-col-action" />
                 </div>
                 {localCloser.map((cfg, i) => (
@@ -479,17 +491,36 @@ export default function SettingsModal({
                       className="st-input st-col-meta"
                       type="number"
                       min={0}
+                      step={0.1}
+                      value={cfg.metas.proposta ?? 1.5}
+                      onChange={(e) => updateCloserMeta(i, 'proposta', e.target.value)}
+                      title="Propostas enviadas"
+                    />
+                    <input
+                      className="st-input st-col-meta"
+                      type="number"
+                      min={0}
                       step={0.01}
                       value={cfg.metas.contratos}
                       onChange={(e) => updateCloserMeta(i, 'contratos', e.target.value)}
                     />
                     <input
-                      className="st-input st-col-wide"
+                      className="st-input st-col-meta"
                       type="number"
                       min={0}
                       step={0.01}
-                      value={cfg.metas.receita}
-                      onChange={(e) => updateCloserMeta(i, 'receita', e.target.value)}
+                      value={cfg.metas.mrr ?? 0}
+                      onChange={(e) => updateCloserMeta(i, 'mrr', e.target.value)}
+                      title="MRR - Monthly Recurring Revenue"
+                    />
+                    <input
+                      className="st-input st-col-meta"
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={cfg.metas.arr ?? 0}
+                      onChange={(e) => updateCloserMeta(i, 'arr', e.target.value)}
+                      title="ARR - Annual Recurring Revenue"
                     />
                     <button
                       className="st-remove-btn"

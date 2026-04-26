@@ -23,9 +23,12 @@ import {
   syncDatesFromCloud,
   loadLeadershipGoalsCloud,
   saveLeadershipGoalsCloud,
+  saveConfigsCloud,
   isSupabaseConfigured,
 } from './db';
 import { setupRealtimeSubscriptions } from './realtime';
+import { SyncProvider } from './context/SyncContext';
+// import { syncAPI4ComForDate } from './api4comSync';
 import { todayString, formatDate, countWorkingDays } from './utils';
 
 import Header from './components/Header';
@@ -33,10 +36,12 @@ import PersonCard from './components/PersonCard';
 import TotalCard from './components/TotalCard';
 import AlertsSection from './components/AlertsSection';
 import EditModal from './components/EditModal';
-import HistoryModal from './components/HistoryModal';
+import AuditHistoryModal from './components/AuditHistoryModal';
 import SettingsModal from './components/SettingsModal';
 import RankingTab from './components/RankingTab';
 import PaceLiderancaTab from './components/PaceLiderancaTab';
+import RelatorioTab from './components/RelatorioTab';
+// import API4ComTab from './components/API4ComTab';
 
 interface EditingPerson {
   id: string;
@@ -109,16 +114,24 @@ export default function App() {
   const [darkMode, setDarkMode] = useState<boolean>(true);
   const [showSettings, setShowSettings] = useState(false);
   const [importRefresh, setImportRefresh] = useState(0);
-  const [activeTab, setActiveTab] = useState<'pace-time' | 'ranking' | 'lideranca'>('pace-time');
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'pace-time' | 'ranking' | 'relatorio' | 'lideranca'>('pace-time');
+  // const [isSyncing, setIsSyncing] = useState(false);
+  // const [syncMsg, setSyncMsg] = useState<string | null>(null);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
 
   const isSingleDay = startDate === endDate;
 
-  // Carrega metas de liderança do cloud na inicialização
+  // Carrega metas de liderança + configs do time do cloud na inicialização
   useEffect(() => {
     loadLeadershipGoalsCloud().then((goals) => {
       setLeadershipGoals(goals);
+      // Se o cloud tem configs mais recentes, aplicar no state
+      if (Array.isArray(goals.sdrConfigs) && goals.sdrConfigs.length > 0) {
+        setSdrConfigs(goals.sdrConfigs);
+      }
+      if (Array.isArray(goals.closerConfigs) && goals.closerConfigs.length > 0) {
+        setCloserConfigs(goals.closerConfigs);
+      }
     });
   }, []);
 
@@ -141,9 +154,18 @@ export default function App() {
       setImportRefresh((n) => n + 1);
     };
 
-    const handleGoalsChange = (newGoals: LeadershipGoals) => {
+    const handleGoalsChange = (newGoals: LeadershipGoals, newSdrConfigs?: SDRConfig[], newCloserConfigs?: CloserConfig[]) => {
       console.log('[App] onGoalsChange notificado');
       setLeadershipGoals(newGoals);
+      // Aplicar configs do time se vieram junto com o update de goals
+      if (Array.isArray(newSdrConfigs) && newSdrConfigs.length > 0) {
+        setSdrConfigs(newSdrConfigs);
+        console.log('[App] SDR configs atualizadas via Realtime');
+      }
+      if (Array.isArray(newCloserConfigs) && newCloserConfigs.length > 0) {
+        setCloserConfigs(newCloserConfigs);
+        console.log('[App] Closer configs atualizadas via Realtime');
+      }
     };
 
     // Setup e retorna cleanup function
@@ -156,6 +178,13 @@ export default function App() {
     };
   }, [startDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Initialize Sync callbacks for UI feedback
+  useEffect(() => {
+    // This hook runs once at mount to set up the sync context
+    // We need to use a callback approach since we can't use hooks inside db.ts
+    // Instead, we'll set up the callbacks via context provider
+  }, []);
+
   // Load single-day data for edit modal / single-day view
   useEffect(() => {
     getDayDataCloud(startDate).then((stored) => {
@@ -167,9 +196,9 @@ export default function App() {
   useEffect(() => {
     if (!isSupabaseConfigured) return;
     const dates = getDateRange(startDate, endDate);
-    setIsSyncing(true);
+    // setIsSyncing(true);
     syncDatesFromCloud(dates).then(() => {
-      setIsSyncing(false);
+      // setIsSyncing(false);
       setImportRefresh((n) => n + 1);
     });
   }, [startDate, endDate]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -306,6 +335,9 @@ export default function App() {
   }, []);
 
   // ─── Save / delete handlers ───────────────────────────────────
+  // const handleSyncAPI4Com = useCallback(async () => {
+  // }, []);
+
   const handleSaveSDR = useCallback(
     (data: SDRData, saveDate: string = startDate) => {
       const newDayData: DayData = { ...dayData, sdrs: { ...dayData.sdrs, [data.id]: data } };
@@ -378,8 +410,18 @@ export default function App() {
     (newSdr: SDRConfig[], newCloser: CloserConfig[], newLeadership?: LeadershipGoals) => {
       saveSDRConfigs(newSdr);
       saveCloserConfigs(newCloser);
+
+      // Sempre sincronizar configs do time para todos no Supabase
+      saveConfigsCloud(newSdr, newCloser);
+
       if (newLeadership) {
-        saveLeadershipGoalsCloud(newLeadership); // salva local + cloud
+        // Incluir configs no payload de goals para garantir sincronização
+        const goalsWithConfigs: LeadershipGoals = {
+          ...newLeadership,
+          sdrConfigs: newSdr,
+          closerConfigs: newCloser,
+        };
+        saveLeadershipGoalsCloud(goalsWithConfigs); // salva local + cloud
         setLeadershipGoals(newLeadership);
       }
       setSdrConfigs(newSdr);
@@ -417,22 +459,16 @@ export default function App() {
   }, [isSingleDay]);
 
   return (
-    <div className="app">
-      <Header
-        startDate={startDate}
-        endDate={endDate}
-        onRangeChange={handleRangeChange}
-        onSettings={() => setShowSettings(true)}
-        darkMode={darkMode}
-        onDarkModeToggle={() => setDarkMode((d) => !d)}
-      />
-
-      {/* Sync indicator */}
-      {isSyncing && (
-        <div className="sync-banner">
-          <span className="sync-spinner">⟳</span> Sincronizando dados com a nuvem…
-        </div>
-      )}
+    <SyncProvider>
+      <div className="app">
+        <Header
+          startDate={startDate}
+          endDate={endDate}
+          onRangeChange={handleRangeChange}
+          onSettings={() => setShowSettings(true)}
+          darkMode={darkMode}
+          onDarkModeToggle={() => setDarkMode((d) => !d)}
+        />
 
       {/* Tab Navigation */}
       <div className="tabs-navigation">
@@ -448,6 +484,18 @@ export default function App() {
         >
           Ranking Comercial
         </button>
+        <button
+          className={`tab-button ${activeTab === 'relatorio' ? 'active' : ''}`}
+          onClick={() => setActiveTab('relatorio')}
+        >
+          Relatório
+        </button>
+        {/* <button
+          className={`tab-button ${activeTab === 'api4com' ? 'active' : ''}`}
+          onClick={() => setActiveTab('api4com')}
+        >
+          API4COM
+        </button> */}
         <button
           className={`tab-button ${activeTab === 'lideranca' ? 'active' : ''}`}
           onClick={() => setActiveTab('lideranca')}
@@ -522,6 +570,8 @@ export default function App() {
           </optgroup>
         </select>
       </div>
+
+      {/* Sync API4com - disabled for now */}
 
       {/* Performance Overview Section */}
       <section className="performance-overview-section">
@@ -603,6 +653,30 @@ export default function App() {
         </div>
       )}
 
+      {/* RELATÓRIO Tab Content */}
+      {activeTab === 'relatorio' && (
+        <div className="tab-content">
+          <RelatorioTab
+            sdrConfigs={sdrConfigs}
+            closerConfigs={closerConfigs}
+            sdrDataArray={effectiveSDRData}
+            closerDataArray={effectiveCloserData}
+            periodSDRConfigs={periodSDRConfigs}
+            periodCloserConfigs={periodCloserConfigs}
+            leadershipGoals={leadershipGoals}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        </div>
+      )}
+
+      {/* API4COM Tab Content */}
+      {/* {activeTab === 'api4com' && (
+        <div className="tab-content">
+          <API4ComTab />
+        </div>
+      )} */}
+
       {/* PACE DA LIDERANÇA Tab Content */}
       {activeTab === 'lideranca' && (
         <div className="tab-content">
@@ -640,14 +714,22 @@ export default function App() {
         />
       )}
 
-      {/* History Modal — SDR */}
+      {/* Audit History Modal — SDR */}
       {historyPerson?.type === 'sdr' && historySDRConfig && (
-        <HistoryModal type="sdr" config={historySDRConfig} onClose={() => setHistoryPerson(null)} />
+        <AuditHistoryModal
+          personId={historyPerson.id}
+          personName={historySDRConfig.nome}
+          onClose={() => setHistoryPerson(null)}
+        />
       )}
 
-      {/* History Modal — Closer */}
+      {/* Audit History Modal — Closer */}
       {historyPerson?.type === 'closer' && historyCloserConfig && (
-        <HistoryModal type="closer" config={historyCloserConfig} onClose={() => setHistoryPerson(null)} />
+        <AuditHistoryModal
+          personId={historyPerson.id}
+          personName={historyCloserConfig.nome}
+          onClose={() => setHistoryPerson(null)}
+        />
       )}
 
       {/* Settings Modal */}
@@ -665,5 +747,6 @@ export default function App() {
         />
       )}
     </div>
+    </SyncProvider>
   );
 }

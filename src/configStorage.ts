@@ -10,10 +10,10 @@ export function loadSDRConfigs(): SDRConfig[] {
     if (raw) {
       const parsed = JSON.parse(raw) as SDRConfig[];
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // Migration: ensure diasUteis exists
+        // Migration: ensure diasUteis exists and is valid (not 0 or NaN)
         return parsed.map(c => ({
           ...c,
-          diasUteis: c.diasUteis ?? 22,
+          diasUteis: (c.diasUteis && isFinite(c.diasUteis) && c.diasUteis > 0) ? c.diasUteis : 22,
         }));
       }
     }
@@ -27,10 +27,10 @@ export function loadCloserConfigs(): CloserConfig[] {
     if (raw) {
       const parsed = JSON.parse(raw) as CloserConfig[];
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // Migration: ensure diasUteis exists
+        // Migration: ensure diasUteis exists and is valid (not 0 or NaN)
         return parsed.map(c => ({
           ...c,
-          diasUteis: c.diasUteis ?? 22,
+          diasUteis: (c.diasUteis && isFinite(c.diasUteis) && c.diasUteis > 0) ? c.diasUteis : 22,
         }));
       }
     }

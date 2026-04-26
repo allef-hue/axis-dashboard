@@ -1,4 +1,6 @@
 import { todayString } from '../utils';
+import { supabase } from '../supabase';
+import SyncIndicator from './SyncIndicator';
 
 interface HeaderProps {
   startDate: string;
@@ -64,6 +66,7 @@ export default function Header({
       </div>
 
       <div className="header-right">
+        <SyncIndicator />
         <button className="btn-settings" onClick={onSettings} title="Configurações da equipe">
           ⚙️ Config
         </button>
@@ -74,6 +77,15 @@ export default function Header({
         >
           {darkMode ? '☀️' : '🌙'}
         </button>
+        {supabase && (
+          <button
+            className="btn-logout"
+            onClick={() => supabase!.auth.signOut()}
+            title="Sair da conta"
+          >
+            Sair
+          </button>
+        )}
       </div>
     </header>
   );

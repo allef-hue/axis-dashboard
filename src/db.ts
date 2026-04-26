@@ -8,10 +8,13 @@
  *
  * Configs (SDR/Closer) são armazenadas DENTRO do registro leadership_goals
  * no campo sdrConfigs/closerConfigs — assim ficam sincronizadas automaticamente.
+ *
+ * Sincronização: Emite eventos via getSyncCallbacks() para UI feedback
  */
 
 import { supabase, isSupabaseConfigured } from './supabase';
 import { DayData, LeadershipGoals, SDRConfig, CloserConfig } from './types';
+import { getSyncCallbacks } from './context/SyncContext';
 import {
   getDayData as localGet,
   saveDayData as localSave,
@@ -32,12 +35,23 @@ import {
 /**
  * Salva os dados de uma pessoa de um dia específico no Supabase.
  * Sempre salva no localStorage primeiro para resposta instantânea.
+ * Emite eventos de sync para feedback na UI.
  */
 export async function saveDayDataCloud(date: string, dayData: DayData): Promise<void> {
   // 1. Salva localmente (imediato)
   localSave(date, dayData);
 
-  if (!isSupabaseConfigured || !supabase) return;
+  const syncCallbacks = getSyncCallbacks();
+  if (syncCallbacks) {
+    syncCallbacks.setSyncing();
+  }
+
+  if (!isSupabaseConfigured || !supabase) {
+    if (syncCallbacks) {
+      syncCallbacks.setSuccess();
+    }
+    return;
+  }
 
   try {
     const upserts = [];
@@ -67,10 +81,20 @@ export async function saveDayDataCloud(date: string, dayData: DayData): Promise<
         .from('day_data')
         .upsert(upserts, { onConflict: 'date,person_id,person_type' });
 
-      if (error) console.error('[DB] Erro ao salvar no Supabase:', error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    if (syncCallbacks) {
+      syncCallbacks.setSuccess();
     }
   } catch (e) {
-    console.error('[DB] saveDayDataCloud falhou:', e);
+    const errorMsg = e instanceof Error ? e.message : 'Erro desconhecido';
+    console.error('[DB] saveDayDataCloud falhou:', errorMsg);
+    if (syncCallbacks) {
+      syncCallbacks.setError(errorMsg);
+    }
   }
 }
 
@@ -220,11 +244,22 @@ export async function loadLeadershipGoalsCloud(): Promise<LeadershipGoals> {
 /**
  * Salva goals + configs do time no Supabase.
  * Inclui automaticamente as configs atuais do localStorage.
+ * Emite eventos de sync para feedback na UI.
  */
 export async function saveLeadershipGoalsCloud(goals: LeadershipGoals): Promise<void> {
   localSaveGoals(goals);
 
-  if (!isSupabaseConfigured || !supabase) return;
+  const syncCallbacks = getSyncCallbacks();
+  if (syncCallbacks) {
+    syncCallbacks.setSyncing();
+  }
+
+  if (!isSupabaseConfigured || !supabase) {
+    if (syncCallbacks) {
+      syncCallbacks.setSuccess();
+    }
+    return;
+  }
 
   // Incluir configs do time no payload para sincronizar com todos
   const payload: LeadershipGoals = {
@@ -251,14 +286,22 @@ export async function saveLeadershipGoalsCloud(goals: LeadershipGoals): Promise<
         .insert({ goals: payload, updated_at: new Date().toISOString() });
     }
     console.log('[DB] Goals + configs salvas no cloud');
+    if (syncCallbacks) {
+      syncCallbacks.setSuccess();
+    }
   } catch (e) {
-    console.error('[DB] saveLeadershipGoalsCloud falhou:', e);
+    const errorMsg = e instanceof Error ? e.message : 'Erro desconhecido';
+    console.error('[DB] saveLeadershipGoalsCloud falhou:', errorMsg);
+    if (syncCallbacks) {
+      syncCallbacks.setError(errorMsg);
+    }
   }
 }
 
 /**
  * Salva as configs do time (SDR + Closer) no Supabase junto com os goals existentes.
  * Chame sempre que as configs forem alteradas nas Configurações.
+ * Emite eventos de sync para feedback na UI.
  */
 export async function saveConfigsCloud(
   sdrConfigs: SDRConfig[],
@@ -268,7 +311,17 @@ export async function saveConfigsCloud(
   localSaveSDRConfigs(sdrConfigs);
   localSaveCloserConfigs(closerConfigs);
 
-  if (!isSupabaseConfigured || !supabase) return;
+  const syncCallbacks = getSyncCallbacks();
+  if (syncCallbacks) {
+    syncCallbacks.setSyncing();
+  }
+
+  if (!isSupabaseConfigured || !supabase) {
+    if (syncCallbacks) {
+      syncCallbacks.setSuccess();
+    }
+    return;
+  }
 
   try {
     // Buscar goals existentes para não perder dados
@@ -297,8 +350,15 @@ export async function saveConfigsCloud(
         .insert({ goals: payload, updated_at: new Date().toISOString() });
     }
     console.log('[DB] Configs do time salvas no cloud');
+    if (syncCallbacks) {
+      syncCallbacks.setSuccess();
+    }
   } catch (e) {
-    console.error('[DB] saveConfigsCloud falhou:', e);
+    const errorMsg = e instanceof Error ? e.message : 'Erro desconhecido';
+    console.error('[DB] saveConfigsCloud falhou:', errorMsg);
+    if (syncCallbacks) {
+      syncCallbacks.setError(errorMsg);
+    }
   }
 }
 
