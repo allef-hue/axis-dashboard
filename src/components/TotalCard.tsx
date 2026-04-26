@@ -161,16 +161,14 @@ export default function TotalCard(props: TotalCardProps) {
           label="Contrato Assinado (Total)"
           formatValue={(v) => v.toFixed(2)}
         />
-        <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', gap: '2rem', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>MRR</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text)' }}>{formatCurrency(totals.mrr)}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>ARR</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text)' }}>{formatCurrency(totals.arr)}</div>
-            </div>
+        <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '3rem' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>💰 MRR</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text)', lineHeight: '1.2' }}>{formatCurrency(totals.mrr || 0)}</div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📈 ARR</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text)', lineHeight: '1.2' }}>{formatCurrency(totals.arr || 0)}</div>
           </div>
         </div>
       </div>
