@@ -377,20 +377,40 @@ export function applyImportRows(rows: ImportRow[]): void {
 
 export function generateCSVTemplate(): string {
   const lines: string[] = [];
-  lines.push('# AXIS Dashboard — Template de Importação');
-  lines.push('# SDR:    data,tipo,pessoa_id,leads,agendamentos,acontecidas,receita_originada,ligacoes_whatsapp,tempo_em_linha_min');
-  lines.push('# Closer: data,tipo,pessoa_id,reunioes,contratos,receita_gerada');
-  lines.push('# Datas no formato YYYY-MM-DD | Datas = dia a dia');
-  lines.push('#');
-  lines.push('data,tipo,pessoa_id,v1,v2,v3,v4,v5,v6');
+  lines.push('AXIS Dashboard — Template de Importação de Dados');
+  lines.push('');
+  lines.push('INSTRUÇÕES:');
+  lines.push('1. Preencha os dados nos campos correspondentes');
+  lines.push('2. Datas no formato: YYYY-MM-DD (ex: 2026-04-26)');
+  lines.push('3. Use "." como separador decimal (ex: 1500.50)');
+  lines.push('4. Não remova as linhas de cabeçalho');
+  lines.push('5. Use valores zerados (0) para dias sem atividade');
+  lines.push('');
+  lines.push('═══════════════════════════════════════════════════');
+  lines.push('EQUIPE SDR');
+  lines.push('═══════════════════════════════════════════════════');
+  lines.push('Data,Tipo,Pessoa ID,Leads,Agendamentos,Acontecidas,Receita Originada,Ligações WhatsApp,Tempo em Linha (min)');
 
   const today = new Date().toISOString().split('T')[0];
   SDR_CONFIGS.forEach((c) => {
     lines.push(`${today},sdr,${c.id},0,0,0,0,0,0`);
   });
+
+  lines.push('');
+  lines.push('═══════════════════════════════════════════════════');
+  lines.push('EQUIPE CLOSER');
+  lines.push('═══════════════════════════════════════════════════');
+  lines.push('Data,Tipo,Pessoa ID,Reuniões,Contratos,Receita Gerada');
   CLOSER_CONFIGS.forEach((c) => {
     lines.push(`${today},closer,${c.id},0,0,0`);
   });
+
+  lines.push('');
+  lines.push('═══════════════════════════════════════════════════');
+  lines.push('EXEMPLOS DE PREENCHIMENTO:');
+  lines.push('═══════════════════════════════════════════════════');
+  lines.push(`${today},sdr,${SDR_CONFIGS[0]?.id || 'joao_silva'},25,8,6,3500,45,180`);
+  lines.push(`${today},closer,${CLOSER_CONFIGS[0]?.id || 'maria_closer'},3,2,12000`);
 
   return lines.join('\n');
 }
