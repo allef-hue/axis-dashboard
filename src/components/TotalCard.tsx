@@ -43,6 +43,7 @@ export default function TotalCard(props: TotalCardProps) {
       receita: configs.reduce((s, c) => s + c.metas.receita, 0),
       ligacoes_whatsapp: configs.reduce((s, c) => s + c.metas.ligacoes_whatsapp, 0),
       tempo_em_linha: configs.reduce((s, c) => s + c.metas.tempo_em_linha, 0),
+      rqa: configs.reduce((s, c) => s + (c.metas.rqa ?? 0), 0),
     };
 
     const totals = {
@@ -52,13 +53,16 @@ export default function TotalCard(props: TotalCardProps) {
       receita: allData.reduce((s, d) => s + (d?.receita ?? 0), 0),
       ligacoes_whatsapp: allData.reduce((s, d) => s + (d?.ligacoes_whatsapp ?? 0), 0),
       tempo_em_linha: allData.reduce((s, d) => s + (d?.tempo_em_linha ?? 0), 0),
+      rqa: allData.reduce((s, d) => s + (d?.rqa ?? 0), 0),
     };
 
     const leadsP = metas.leads > 0 ? totals.leads / metas.leads : 0;
     const agendP = metas.agendamentos > 0 ? totals.agendamentos / metas.agendamentos : 0;
     const acontP = metas.acontecidas > 0 ? totals.acontecidas / metas.acontecidas : 0;
     const recP = metas.receita > 0 ? totals.receita / metas.receita : 0;
-    const overallPct = Math.min(Math.round(((leadsP + agendP + acontP + recP) / 4) * 100), 100);
+    const rqaMetaVal = metas.rqa || 50;
+    const rqaP = totals.rqa / rqaMetaVal;
+    const overallPct = Math.min(Math.round(((leadsP + agendP + acontP + recP + rqaP) / 5) * 100), 100);
     const pctClass = getPctClass(overallPct);
     const activeCount = allData.filter((d) => d !== null).length;
 
@@ -91,7 +95,8 @@ export default function TotalCard(props: TotalCardProps) {
           />
           <ProgressBar value={totals.agendamentos} max={metas.agendamentos} label="Agendamentos (Total)" />
           <ProgressBar value={totals.acontecidas} max={metas.acontecidas} label="Acontecidas (Total)" />
-          <ProgressBar value={totals.receita} max={metas.receita} label="Receita Originada (Total)" formatValue={formatCurrency} isCurrency />
+          <ProgressBar value={totals.rqa} max={metas.rqa || 50} label="RQA (Total)" formatValue={(v) => v.toFixed(1)} />
+          <ProgressBar value={totals.receita} max={metas.receita} label="Pago (Total)" formatValue={formatCurrency} isCurrency />
         </div>
       </div>
     );
@@ -102,20 +107,23 @@ export default function TotalCard(props: TotalCardProps) {
 
   const metas = {
     reunioes: configs.reduce((s, c) => s + c.metas.reunioes, 0),
+    proposta: configs.reduce((s, c) => s + (c.metas.proposta ?? 0), 0),
     contratos: configs.reduce((s, c) => s + c.metas.contratos, 0),
-    receita: configs.reduce((s, c) => s + c.metas.receita, 0),
   };
 
   const totals = {
     reunioes: allData.reduce((s, d) => s + (d?.reunioes ?? 0), 0),
+    proposta: allData.reduce((s, d) => s + (d?.proposta ?? 0), 0),
     contratos: allData.reduce((s, d) => s + (d?.contratos ?? 0), 0),
-    receita: allData.reduce((s, d) => s + (d?.receita ?? 0), 0),
+    mrr: allData.reduce((s, d) => s + (d?.mrr ?? 0), 0),
+    arr: allData.reduce((s, d) => s + (d?.arr ?? 0), 0),
   };
 
   const reunP = metas.reunioes > 0 ? totals.reunioes / metas.reunioes : 0;
+  const propMetaVal = metas.proposta || 4.5;
+  const propP = totals.proposta / propMetaVal;
   const contP = metas.contratos > 0 ? totals.contratos / metas.contratos : 0;
-  const recP = metas.receita > 0 ? totals.receita / metas.receita : 0;
-  const overallPct = Math.min(Math.round(((reunP + contP + recP) / 3) * 100), 100);
+  const overallPct = Math.min(Math.round(((reunP + propP + contP) / 3) * 100), 100);
   const pctClass = getPctClass(overallPct);
   const activeCount = allData.filter((d) => d !== null).length;
 
@@ -136,21 +144,33 @@ export default function TotalCard(props: TotalCardProps) {
         <ProgressBar
           value={totals.reunioes}
           max={metas.reunioes}
-          label="Reuniões (Total)"
+          label="Reunião Acontecida (Total)"
+          formatValue={(v) => v.toFixed(1)}
+        />
+        <ProgressBar
+          value={totals.proposta}
+          max={metas.proposta || 4.5}
+          label="Proposta (Total)"
           formatValue={(v) => v.toFixed(1)}
         />
         <ProgressBar
           value={totals.contratos}
           max={metas.contratos}
-          label="Contratos (Total)"
+          label="Contrato Assinado (Total)"
           formatValue={(v) => v.toFixed(2)}
         />
-        <ProgressBar
-          value={totals.receita}
-          max={metas.receita}
-          label="Receita (Total)"
-          formatValue={formatCurrency}
-        />
+        <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', gap: '2rem', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>MRR</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text)' }}>{formatCurrency(totals.mrr)}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>ARR</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text)' }}>{formatCurrency(totals.arr)}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
