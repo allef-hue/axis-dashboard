@@ -487,6 +487,7 @@ export default function SettingsModal({
                   <span className="st-col-meta">Reuniões</span>
                   <span className="st-col-meta">Proposta</span>
                   <span className="st-col-meta">Contratos</span>
+                  <span className="st-col-meta">Pago</span>
                   <span className="st-col-meta">MRR</span>
                   <span className="st-col-meta">ARR</span>
                   <span className="st-col-action" />
@@ -531,6 +532,15 @@ export default function SettingsModal({
                       step={0.01}
                       value={cfg.metas.contratos}
                       onChange={(e) => updateCloserMeta(i, 'contratos', e.target.value)}
+                    />
+                    <input
+                      className="st-input st-col-meta"
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={cfg.metas.receita}
+                      onChange={(e) => updateCloserMeta(i, 'receita', e.target.value)}
+                      title="Receita paga"
                     />
                     <input
                       className="st-input st-col-meta"
