@@ -408,12 +408,14 @@ export default function App() {
 
   // ─── Settings save ────────────────────────────────────────────
   const handleSaveSettings = useCallback(
-    (newSdr: SDRConfig[], newCloser: CloserConfig[], newLeadership?: LeadershipGoals) => {
+    async (newSdr: SDRConfig[], newCloser: CloserConfig[], newLeadership?: LeadershipGoals) => {
+      // Salvar localmente primeiro (imediato)
       saveSDRConfigs(newSdr);
       saveCloserConfigs(newCloser);
 
-      // Sempre sincronizar configs do time para todos no Supabase
-      saveConfigsCloud(newSdr, newCloser);
+      // Aguardar sincronização com Supabase antes de fechar modal
+      // Isso garante que os dados (incluindo emails) estão no cloud rapidamente
+      await saveConfigsCloud(newSdr, newCloser);
 
       if (newLeadership) {
         // Incluir configs no payload de goals para garantir sincronização
@@ -422,7 +424,7 @@ export default function App() {
           sdrConfigs: newSdr,
           closerConfigs: newCloser,
         };
-        saveLeadershipGoalsCloud(goalsWithConfigs); // salva local + cloud
+        await saveLeadershipGoalsCloud(goalsWithConfigs); // salva local + cloud
         setLeadershipGoals(newLeadership);
       }
       setSdrConfigs(newSdr);
