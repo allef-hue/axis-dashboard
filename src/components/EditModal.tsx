@@ -55,6 +55,7 @@ export default function EditModal(props: EditModalProps) {
       const d = data as CloserData | null;
       setFields({
         reunioes: d ? String(d.reunioes) : '',
+        proposta: d ? String(d.proposta ?? 0) : '',
         contratos: d ? String(d.contratos) : '',
         receita: d ? String(d.receita) : '',
         mrr: d ? String(d.mrr ?? 0) : '',
@@ -68,7 +69,7 @@ export default function EditModal(props: EditModalProps) {
   const fieldKeys =
     type === 'sdr'
       ? ['leads', 'agendamentos', 'acontecidas', 'receita', 'ligacoes_whatsapp', 'tempo_em_linha', 'rqa']
-      : ['reunioes', 'contratos', 'receita', 'mrr', 'arr'];
+      : ['reunioes', 'proposta', 'contratos', 'receita', 'mrr', 'arr'];
 
   const sdrMetas = type === 'sdr' ? (config as SDRConfig).metas : null;
   const closerMetas = type === 'closer' ? (config as CloserConfig).metas : null;
@@ -82,6 +83,7 @@ export default function EditModal(props: EditModalProps) {
     tempo_em_linha: '⏱️ Tempo em Linha (min)',
     rqa: 'RQA (Qualidade de Atendimento)',
     reunioes: 'Reuniões Recebidas',
+    proposta: 'Proposta Enviada',
     contratos: 'Contratos Assinados',
     mrr: 'MRR (R$)',
     arr: 'ARR (R$)',
@@ -99,6 +101,7 @@ export default function EditModal(props: EditModalProps) {
     tempo_em_linha: `Meta mensal: ${sdrMetas?.tempo_em_linha ?? ''} minutos`,
     rqa: `Meta mensal: ${sdrMetas?.rqa ?? '10'} de RQA`,
     reunioes: `Meta diária: ${closerMetas?.reunioes ?? ''} reuniões`,
+    proposta: `Meta diária: ${closerMetas?.proposta ?? ''} propostas`,
     contratos: `Meta diária: ${closerMetas?.contratos ?? ''} contratos`,
     mrr: `Meta mensal: ${formatCurrency(closerMetas?.mrr ?? 0)} de MRR`,
     arr: `Meta mensal: ${formatCurrency(closerMetas?.arr ?? 0)} de ARR`,
@@ -107,14 +110,14 @@ export default function EditModal(props: EditModalProps) {
   const fieldPlaceholders: Record<string, string> = {
     leads: '0', agendamentos: '0', acontecidas: '0',
     receita: '0,00', ligacoes_whatsapp: '0', tempo_em_linha: '0', rqa: '0',
-    reunioes: '0', contratos: '0',
+    reunioes: '0', proposta: '0', contratos: '0',
     mrr: '0,00', arr: '0,00',
   };
 
   const fieldSteps: Record<string, string> = {
     leads: '1', agendamentos: '1', acontecidas: '1',
     receita: '0.01', ligacoes_whatsapp: '1', tempo_em_linha: '1', rqa: '0.1',
-    reunioes: '0.5', contratos: '0.01',
+    reunioes: '0.5', proposta: '0.5', contratos: '0.01',
     mrr: '0.01', arr: '0.01',
   };
 
@@ -172,6 +175,7 @@ export default function EditModal(props: EditModalProps) {
       (props as EditModalCloser).onSave({
         id: c.id, nome: c.nome,
         reunioes: parseVal(fields.reunioes),
+        proposta: parseVal(fields.proposta),
         contratos: parseVal(fields.contratos),
         receita: parseVal(fields.receita),
         mrr: parseVal(fields.mrr),
