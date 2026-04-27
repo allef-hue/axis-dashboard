@@ -151,7 +151,7 @@ export default function PersonCard(props: PersonCardProps) {
   const closerData = data as CloserData | null;
   const eff: CloserData = closerData ?? {
     id: cfg.id, nome: cfg.nome,
-    reunioes: 0, contratos: 0, receita: 0,
+    reunioes: 0, proposta: 0, contratos: 0, receita: 0,
     vendas: 0, arr: 0, mrr: 0, valor_recebido: 0,
     updatedAt: '',
   };

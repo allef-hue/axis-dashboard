@@ -198,7 +198,9 @@ export default function App() {
 
   // Load single-day data for edit modal / single-day view
   useEffect(() => {
+    console.log('[App] Carregando dados para data:', startDate);
     getDayDataCloud(startDate).then((stored) => {
+      console.log('[App] Dados carregados:', stored);
       setDayData(stored ?? getEmptyDayData(startDate));
     });
   }, [startDate, importRefresh]);
@@ -359,9 +361,18 @@ export default function App() {
 
   const handleSaveSDR = useCallback(
     (data: SDRData, saveDate: string = startDate) => {
-      const newDayData: DayData = { ...dayData, sdrs: { ...dayData.sdrs, [data.id]: data } };
-      setDayData(newDayData);
-      saveDayDataCloud(saveDate, newDayData); // salva local + cloud
+      // Se saveDate === startDate, atualizar UI state imediatamente
+      // Se saveDate !== startDate, apenas salvar no cloud sem atualizar UI
+      if (saveDate === startDate) {
+        const newDayData: DayData = { ...dayData, sdrs: { ...dayData.sdrs, [data.id]: data } };
+        setDayData(newDayData);
+        saveDayDataCloud(saveDate, newDayData); // salva local + cloud
+      } else {
+        // Salvar para data diferente: carregar dayData para saveDate, atualizar, e salvar
+        const storedDay = getDayData(saveDate) ?? getEmptyDayData(saveDate);
+        const newDayData: DayData = { ...storedDay, sdrs: { ...storedDay.sdrs, [data.id]: data } };
+        saveDayDataCloud(saveDate, newDayData); // salva local + cloud
+      }
       setEditingPerson(null);
       setImportRefresh((n) => n + 1);
     },
@@ -370,9 +381,18 @@ export default function App() {
 
   const handleSaveCloser = useCallback(
     (data: CloserData, saveDate: string = startDate) => {
-      const newDayData: DayData = { ...dayData, closers: { ...dayData.closers, [data.id]: data } };
-      setDayData(newDayData);
-      saveDayDataCloud(saveDate, newDayData); // salva local + cloud
+      // Se saveDate === startDate, atualizar UI state imediatamente
+      // Se saveDate !== startDate, apenas salvar no cloud sem atualizar UI
+      if (saveDate === startDate) {
+        const newDayData: DayData = { ...dayData, closers: { ...dayData.closers, [data.id]: data } };
+        setDayData(newDayData);
+        saveDayDataCloud(saveDate, newDayData); // salva local + cloud
+      } else {
+        // Salvar para data diferente: carregar dayData para saveDate, atualizar, e salvar
+        const storedDay = getDayData(saveDate) ?? getEmptyDayData(saveDate);
+        const newDayData: DayData = { ...storedDay, closers: { ...storedDay.closers, [data.id]: data } };
+        saveDayDataCloud(saveDate, newDayData); // salva local + cloud
+      }
       setEditingPerson(null);
       setImportRefresh((n) => n + 1);
     },
@@ -542,15 +562,6 @@ export default function App() {
       {/* PACE TIME Tab Content */}
       {activeTab === 'pace-time' && (
         <>
-      <AlertsSection
-        sdrData={effectiveSDRData}
-        sdrConfigs={periodSDRConfigs}
-        closerData={effectiveCloserData}
-        closerConfigs={periodCloserConfigs}
-        isPeriodView={isPeriodView}
-        daysWithAnyData={aggregated?.daysWithAnyData ?? (isPeriodView ? 0 : 1)}
-      />
-
       {/* Banner: preenchimento diário */}
       {isSingleDay && (
         <div className="day-fill-banner">
@@ -709,6 +720,8 @@ export default function App() {
             leadershipGoals={leadershipGoals}
             startDate={startDate}
             endDate={endDate}
+            isPeriodView={isPeriodView}
+            daysWithAnyData={aggregated?.daysWithAnyData ?? (isPeriodView ? 0 : 1)}
           />
         </div>
       )}

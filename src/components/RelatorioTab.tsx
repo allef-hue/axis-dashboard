@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { SDRConfig, CloserConfig, SDRData, CloserData, LeadershipGoals } from '../types';
 import { formatCurrency } from '../utils';
+import AlertsSection from './AlertsSection';
 
 interface RelatorioTabProps {
   sdrConfigs: SDRConfig[];
@@ -16,6 +17,8 @@ interface RelatorioTabProps {
   leadershipGoals: LeadershipGoals;
   startDate: string;
   endDate: string;
+  isPeriodView?: boolean;
+  daysWithAnyData?: number;
 }
 
 type SDRMetric = 'leads' | 'agendamentos' | 'acontecidas' | 'receita' | 'ligacoes_whatsapp' | 'tempo_em_linha';
@@ -61,6 +64,8 @@ export default function RelatorioTab({
   closerDataArray,
   periodSDRConfigs,
   periodCloserConfigs,
+  isPeriodView,
+  daysWithAnyData,
 }: RelatorioTabProps) {
   const [sdrMetric, setSdrMetric] = useState<SDRMetric>('leads');
   const [closerMetric, setCloserMetric] = useState<CloserMetric>('reunioes');
@@ -157,6 +162,16 @@ export default function RelatorioTab({
 
   return (
     <div className="relatorio-tab">
+
+      {/* ─── Alertas ────────────────────────────────── */}
+      <AlertsSection
+        sdrData={sdrDataArray}
+        sdrConfigs={periodSDRConfigs}
+        closerData={closerDataArray}
+        closerConfigs={periodCloserConfigs}
+        isPeriodView={isPeriodView}
+        daysWithAnyData={daysWithAnyData}
+      />
 
       {/* ─── Resumo Geral ─────────────────────────────── */}
       <section className="relatorio-section">
