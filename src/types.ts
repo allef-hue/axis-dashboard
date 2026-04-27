@@ -37,15 +37,15 @@ export interface SDRConfig {
   id: string;
   nome: string;
   email?: string; // Email do usuário que pode editar este card (ex: jose@grupovorp.com)
-  diasUteis: number; // Dias úteis no mês (para cálculo de pace)
+  diasUteis: number; // Dias úteis no mês (referência para cálculo de metas diárias)
   metas: {
-    leads: number;
-    agendamentos: number;
-    acontecidas: number;
-    receita: number; // Meta mensal
-    ligacoes_whatsapp: number; // Meta mensal
-    tempo_em_linha: number; // Meta mensal em minutos
-    rqa?: number; // Meta mensal de RQA
+    leads: number; // Meta diária (ex: 44 leads/dia)
+    agendamentos: number; // Meta diária
+    acontecidas: number; // Meta diária
+    receita: number; // Meta diária
+    ligacoes_whatsapp: number; // Meta mensal (não se multiplica por dias)
+    tempo_em_linha: number; // Meta mensal em minutos (não se multiplica por dias)
+    rqa?: number; // Meta mensal de RQA (não se multiplica por dias)
   };
 }
 
@@ -53,14 +53,14 @@ export interface CloserConfig {
   id: string;
   nome: string;
   email?: string; // Email do usuário que pode editar este card (ex: allef@grupovorp.com)
-  diasUteis: number; // Dias úteis no mês
+  diasUteis: number; // Dias úteis esperados no mês (para scaling de métricas mensais)
   metas: {
-    reunioes: number;
-    proposta?: number; // Meta mensal de propostas
-    contratos: number;
-    receita: number; // Meta mensal
-    mrr?: number; // Meta mensal de MRR
-    arr?: number; // Meta mensal de ARR
+    reunioes: number; // Meta diária (ex: 1.36 reuniões/dia)
+    proposta?: number; // Meta diária de propostas
+    contratos: number; // Meta diária
+    receita: number; // Meta diária
+    mrr?: number; // Meta mensal (não é per-dia, escala com dias úteis do período)
+    arr?: number; // Meta mensal (não é per-dia, escala com dias úteis do período)
   };
 }
 

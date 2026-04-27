@@ -275,16 +275,19 @@ export default function App() {
   }, [isSingleDay, dayData, aggregated]);
 
   // ─── Expected configs: metas proporcionais ao período ─────────
-  // target = (meta_mensal / dias_úteis_mês) × dias_úteis_no_período
+  // Métricas DIÁRIAS (leads, agendamentos, reuniões, contratos): multiplicam por dias úteis no período
+  // Métricas MENSAIS FIXAS (ligações, tempo, RQA, MRR, ARR): escalam proporcionalmente
   const expectedSDRConfigs: SDRConfig[] = useMemo(
     () =>
       sdrConfigs.map((c) => ({
         ...c,
         metas: {
-          leads: (c.metas.leads / c.diasUteis) * workingDaysInRange,
-          agendamentos: (c.metas.agendamentos / c.diasUteis) * workingDaysInRange,
-          acontecidas: (c.metas.acontecidas / c.diasUteis) * workingDaysInRange,
-          receita: (c.metas.receita / c.diasUteis) * workingDaysInRange,
+          // Daily metrics - scale with working days
+          leads: c.metas.leads * workingDaysInRange,
+          agendamentos: c.metas.agendamentos * workingDaysInRange,
+          acontecidas: c.metas.acontecidas * workingDaysInRange,
+          receita: c.metas.receita * workingDaysInRange,
+          // Monthly totals - scale proportionally: total * (actual_days / expected_days_per_month)
           ligacoes_whatsapp: (c.metas.ligacoes_whatsapp / c.diasUteis) * workingDaysInRange,
           tempo_em_linha: (c.metas.tempo_em_linha / c.diasUteis) * workingDaysInRange,
         },
@@ -297,9 +300,14 @@ export default function App() {
       closerConfigs.map((c) => ({
         ...c,
         metas: {
-          reunioes: (c.metas.reunioes / c.diasUteis) * workingDaysInRange,
-          contratos: (c.metas.contratos / c.diasUteis) * workingDaysInRange,
-          receita: (c.metas.receita / c.diasUteis) * workingDaysInRange,
+          // Daily metrics - scale with working days
+          reunioes: c.metas.reunioes * workingDaysInRange,
+          proposta: (c.metas.proposta ?? 0) * workingDaysInRange,
+          contratos: c.metas.contratos * workingDaysInRange,
+          receita: c.metas.receita * workingDaysInRange,
+          // Monthly totals - scale proportionally
+          mrr: ((c.metas.mrr ?? 0) / c.diasUteis) * workingDaysInRange,
+          arr: ((c.metas.arr ?? 0) / c.diasUteis) * workingDaysInRange,
         },
       })),
     [closerConfigs, workingDaysInRange]
