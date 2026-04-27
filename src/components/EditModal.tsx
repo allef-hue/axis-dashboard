@@ -36,42 +36,96 @@ function validateNumber(val: string, isRequired: boolean = true): string | null 
 export default function EditModal(props: EditModalProps) {
   const { type, config, data, date, onClose, onDelete } = props;
 
-  const [fields, setFields] = useState<Record<string, string>>({});
+  // Log component mount for debugging
+  if (typeof window !== 'undefined' && window.console) {
+    console.log('[EditModal] Mounting with type:', type, 'config:', config?.nome, 'data:', data);
+  }
+
+  // Initialize fields with default values to ensure they always exist
+  const getInitialFields = (): Record<string, string> => {
+    if (type === 'sdr') {
+      const d = data as SDRData | null;
+      return {
+        leads: d?.leads ? String(d.leads) : '0',
+        agendamentos: d?.agendamentos ? String(d.agendamentos) : '0',
+        acontecidas: d?.acontecidas ? String(d.acontecidas) : '0',
+        receita: d?.receita ? String(d.receita) : '0',
+        ligacoes_whatsapp: d?.ligacoes_whatsapp ? String(d.ligacoes_whatsapp) : '0',
+        tempo_em_linha: d?.tempo_em_linha ? String(d.tempo_em_linha) : '0',
+        rqa: d?.rqa ? String(d.rqa) : '0',
+      };
+    } else {
+      const d = data as CloserData | null;
+      return {
+        reunioes: d?.reunioes ? String(d.reunioes) : '0',
+        proposta: d?.proposta ? String(d.proposta) : '0',
+        contratos: d?.contratos ? String(d.contratos) : '0',
+        receita: d?.receita ? String(d.receita) : '0',
+        mrr: d?.mrr ? String(d.mrr) : '0',
+        arr: d?.arr ? String(d.arr) : '0',
+      };
+    }
+  };
+
+  const [fields, setFields] = useState<Record<string, string>>(getInitialFields);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [selectedDate, setSelectedDate] = useState<string>(date);
 
   useEffect(() => {
-    if (type === 'sdr') {
-      const d = data as SDRData | null;
-      setFields({
-        leads: d ? String(d.leads) : '',
-        agendamentos: d ? String(d.agendamentos) : '',
-        acontecidas: d ? String(d.acontecidas) : '',
-        receita: d ? String(d.receita ?? 0) : '',
-        ligacoes_whatsapp: d ? String(d.ligacoes_whatsapp ?? 0) : '',
-        tempo_em_linha: d ? String(d.tempo_em_linha ?? 0) : '',
-        rqa: d ? String(d.rqa ?? 0) : '',
-      });
-    } else {
-      const d = data as CloserData | null;
-      setFields({
-        reunioes: d ? String(d.reunioes) : '',
-        proposta: d ? String(d.proposta ?? 0) : '',
-        contratos: d ? String(d.contratos) : '',
-        receita: d ? String(d.receita) : '',
-        mrr: d ? String(d.mrr ?? 0) : '',
-        arr: d ? String(d.arr ?? 0) : '',
-      });
-    }
+    const initialFields = getInitialFields();
+    setFields(initialFields);
     setErrors({});
     setTouched({});
+    console.log('[EditModal] Fields initialized:', initialFields);
   }, [type, data]);
 
   const fieldKeys =
     type === 'sdr'
       ? ['leads', 'agendamentos', 'acontecidas', 'receita', 'ligacoes_whatsapp', 'tempo_em_linha', 'rqa']
       : ['reunioes', 'proposta', 'contratos', 'receita', 'mrr', 'arr'];
+
+  // Safety check - ensure fieldKeys is not empty
+  if (!fieldKeys || fieldKeys.length === 0) {
+    console.error('[EditModal] ERROR: fieldKeys is empty! type:', type);
+    return (
+      <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+        <div className="modal" role="dialog" aria-modal="true">
+          <div className="modal-header">
+            <div>Erro ao carregar formulário</div>
+            <button className="modal-close" onClick={onClose}>✕</button>
+          </div>
+          <div className="modal-body">
+            <p>Erro: Formulário não pode ser carregado. Entre em contato com o suporte.</p>
+          </div>
+          <div className="modal-footer">
+            <button className="btn-cancel" onClick={onClose}>Fechar</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Safety checks for config and metas
+  if (!config) {
+    console.error('[EditModal] ERROR: config is missing!');
+    return (
+      <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+        <div className="modal" role="dialog" aria-modal="true">
+          <div className="modal-header">
+            <div>Erro ao carregar</div>
+            <button className="modal-close" onClick={onClose}>✕</button>
+          </div>
+          <div className="modal-body">
+            <p>Erro: Configuração não encontrada.</p>
+          </div>
+          <div className="modal-footer">
+            <button className="btn-cancel" onClick={onClose}>Fechar</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const sdrMetas = type === 'sdr' ? (config as SDRConfig).metas : null;
   const closerMetas = type === 'closer' ? (config as CloserConfig).metas : null;

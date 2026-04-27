@@ -36,7 +36,6 @@ import { todayString, formatDate, countWorkingDays } from './utils';
 import Header from './components/Header';
 import PersonCard from './components/PersonCard';
 import TotalCard from './components/TotalCard';
-import AlertsSection from './components/AlertsSection';
 import EditModal from './components/EditModal';
 import AuditHistoryModal from './components/AuditHistoryModal';
 import SettingsModal from './components/SettingsModal';
