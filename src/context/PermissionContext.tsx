@@ -39,11 +39,12 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
               .select('email')
               .eq('email', userEmail)
               .eq('status', 'active')
-              .single();
+              .maybeSingle(); // Não lança erro se não encontra
 
             isAdmin = !!data;
-          } catch {
-            // Tabela não existe ainda ou nenhum resultado
+          } catch (e) {
+            // Tabela não existe ainda ou erro na query
+            console.warn('Erro ao verificar admin status:', e);
             isAdmin = false;
           }
         }
