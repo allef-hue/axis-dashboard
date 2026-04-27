@@ -229,30 +229,22 @@ export default function PersonCard(props: PersonCardProps) {
         />
       </div>
 
-      {/* Seção de Pace */}
-      {closerPaceInfo && (
-        <div className="pace-section">
-          <div className="pace-title">Reuniões (Pace do Período)</div>
-          <div className="pace-row">
-            <span className="pace-label">Realizado:</span>
-            <span className="pace-value">{limitDecimals(eff.reunioes, 2)}</span>
-          </div>
-          <div className="pace-row">
-            <span className="pace-label">Pace esperado:</span>
-            <span className="pace-value">{limitDecimals(closerPaceInfo.paceEsperado, 2)}</span>
-          </div>
-          <div className="pace-row">
-            <span className="pace-label">Dias úteis:</span>
-            <span className="pace-value">{closerPaceInfo.diasUteis}</span>
-          </div>
-          <div className="pace-row pace-saude">
-            <span className="pace-label">Saúde:</span>
-            <span className={`pace-saude-value ${closerPaceInfo.saude >= 100 ? 'saude-good' : closerPaceInfo.saude >= 50 ? 'saude-warn' : 'saude-bad'}`}>
-              {limitDecimals(closerPaceInfo.saude, 2)}%
-            </span>
-          </div>
-        </div>
-      )}
+      <div className="card-metrics">
+        <ProgressBar
+          value={eff.mrr ?? 0}
+          max={cfg.metas.mrr ?? 0}
+          label="MRR"
+          formatValue={formatCurrency}
+          isCurrency
+        />
+        <ProgressBar
+          value={eff.arr ?? 0}
+          max={cfg.metas.arr ?? 0}
+          label="ARR"
+          formatValue={formatCurrency}
+          isCurrency
+        />
+      </div>
 
       {isPeriodView && monthlyConfig && (
         <div className="card-gap-row">

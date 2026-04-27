@@ -57,6 +57,8 @@ export default function EditModal(props: EditModalProps) {
         reunioes: d ? String(d.reunioes) : '',
         contratos: d ? String(d.contratos) : '',
         receita: d ? String(d.receita) : '',
+        mrr: d ? String(d.mrr ?? 0) : '',
+        arr: d ? String(d.arr ?? 0) : '',
       });
     }
     setErrors({});
@@ -66,7 +68,7 @@ export default function EditModal(props: EditModalProps) {
   const fieldKeys =
     type === 'sdr'
       ? ['leads', 'agendamentos', 'acontecidas', 'receita', 'ligacoes_whatsapp', 'tempo_em_linha', 'rqa']
-      : ['reunioes', 'contratos', 'receita'];
+      : ['reunioes', 'contratos', 'receita', 'mrr', 'arr'];
 
   const sdrMetas = type === 'sdr' ? (config as SDRConfig).metas : null;
   const closerMetas = type === 'closer' ? (config as CloserConfig).metas : null;
@@ -81,6 +83,8 @@ export default function EditModal(props: EditModalProps) {
     rqa: 'RQA (Qualidade de Atendimento)',
     reunioes: 'Reuniões Recebidas',
     contratos: 'Contratos Assinados',
+    mrr: 'MRR (R$)',
+    arr: 'ARR (R$)',
   };
 
   const fieldHints: Record<string, string> = {
@@ -96,18 +100,22 @@ export default function EditModal(props: EditModalProps) {
     rqa: `Meta mensal: ${sdrMetas?.rqa ?? '10'} de RQA`,
     reunioes: `Meta diária: ${closerMetas?.reunioes ?? ''} reuniões`,
     contratos: `Meta diária: ${closerMetas?.contratos ?? ''} contratos`,
+    mrr: `Meta mensal: ${formatCurrency(closerMetas?.mrr ?? 0)} de MRR`,
+    arr: `Meta mensal: ${formatCurrency(closerMetas?.arr ?? 0)} de ARR`,
   };
 
   const fieldPlaceholders: Record<string, string> = {
     leads: '0', agendamentos: '0', acontecidas: '0',
     receita: '0,00', ligacoes_whatsapp: '0', tempo_em_linha: '0', rqa: '0',
     reunioes: '0', contratos: '0',
+    mrr: '0,00', arr: '0,00',
   };
 
   const fieldSteps: Record<string, string> = {
     leads: '1', agendamentos: '1', acontecidas: '1',
     receita: '0.01', ligacoes_whatsapp: '1', tempo_em_linha: '1', rqa: '0.1',
     reunioes: '0.5', contratos: '0.01',
+    mrr: '0.01', arr: '0.01',
   };
 
   function handleChange(key: string, val: string) {
@@ -166,6 +174,8 @@ export default function EditModal(props: EditModalProps) {
         reunioes: parseVal(fields.reunioes),
         contratos: parseVal(fields.contratos),
         receita: parseVal(fields.receita),
+        mrr: parseVal(fields.mrr),
+        arr: parseVal(fields.arr),
         updatedAt: now,
       }, selectedDate);
     }
