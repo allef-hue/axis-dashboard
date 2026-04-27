@@ -189,12 +189,6 @@ export default function PersonCard(props: PersonCardProps) {
   const status = getCloserStatus(eff, cfg.metas);
   const pct = getCloserPercent(eff, cfg.metas);
 
-  // Calcula o pace se datas forem fornecidas
-  let closerPaceInfo = null;
-  if (props.startDate && props.endDate && cfg.metas.reunioes > 0) {
-    closerPaceInfo = calculatePaceForDateRange(cfg.metas.reunioes, props.startDate, props.endDate, eff.reunioes);
-  }
-
   return (
     <div className={`person-card status-${status}`}>
       <div className="card-header">
