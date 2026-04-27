@@ -53,21 +53,21 @@ export const CLOSER_CONFIGS: CloserConfig[] = [
     nome: 'Eliel',
     email: 'eliel@grupovorp.com',
     diasUteis: 22,
-    metas: { reunioes: 3.5, proposta: 1.5, contratos: 0.58, receita: 1583.88, mrr: 0, arr: 0 },
+    metas: { reunioes: 1.36, proposta: 0.68, contratos: 0.45, receita: 909.09, mrr: 20000, arr: 130000 },
   },
   {
     id: 'gabriel_cinato',
     nome: 'Gabriel Cinato',
     email: 'gabriel@grupovorp.com',
     diasUteis: 22,
-    metas: { reunioes: 3.5, proposta: 1.5, contratos: 0.58, receita: 1583.88, mrr: 0, arr: 0 },
+    metas: { reunioes: 1.36, proposta: 0.55, contratos: 0.27, receita: 1636.36, mrr: 36000, arr: 234000 },
   },
   {
     id: 'bruno_levy',
     nome: 'Bruno Levy',
     email: 'bruno.levy@grupovorp.com',
     diasUteis: 22,
-    metas: { reunioes: 3.5, proposta: 1.5, contratos: 0.58, receita: 1583.88, mrr: 0, arr: 0 },
+    metas: { reunioes: 1.36, proposta: 0.55, contratos: 0.27, receita: 1636.36, mrr: 36000, arr: 234000 },
   },
 ];
 
