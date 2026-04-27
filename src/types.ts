@@ -42,10 +42,10 @@ export interface SDRConfig {
     leads: number; // Meta diária (ex: 44 leads/dia)
     agendamentos: number; // Meta diária
     acontecidas: number; // Meta diária
-    receita: number; // Meta diária
-    ligacoes_whatsapp: number; // Meta mensal (não se multiplica por dias)
-    tempo_em_linha: number; // Meta mensal em minutos (não se multiplica por dias)
-    rqa?: number; // Meta mensal de RQA (não se multiplica por dias)
+    receita: number; // Meta mensal (escala proporcionalmente com dias úteis do período)
+    ligacoes_whatsapp: number; // Meta mensal (escala proporcionalmente com dias úteis)
+    tempo_em_linha: number; // Meta mensal em minutos (escala proporcionalmente com dias úteis)
+    rqa?: number; // Meta mensal de RQA (escala proporcionalmente com dias úteis)
   };
 }
 
@@ -58,9 +58,9 @@ export interface CloserConfig {
     reunioes: number; // Meta diária (ex: 1.36 reuniões/dia)
     proposta?: number; // Meta diária de propostas
     contratos: number; // Meta diária
-    receita: number; // Meta diária
-    mrr?: number; // Meta mensal (não é per-dia, escala com dias úteis do período)
-    arr?: number; // Meta mensal (não é per-dia, escala com dias úteis do período)
+    receita: number; // Meta mensal (escala proporcionalmente com dias úteis do período)
+    mrr?: number; // Meta mensal (escala proporcionalmente com dias úteis)
+    arr?: number; // Meta mensal (escala proporcionalmente com dias úteis)
   };
 }
 

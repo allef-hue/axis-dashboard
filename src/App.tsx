@@ -286,8 +286,8 @@ export default function App() {
           leads: c.metas.leads * workingDaysInRange,
           agendamentos: c.metas.agendamentos * workingDaysInRange,
           acontecidas: c.metas.acontecidas * workingDaysInRange,
-          receita: c.metas.receita * workingDaysInRange,
-          // Monthly totals - scale proportionally: total * (actual_days / expected_days_per_month)
+          // Monthly totals - scale proportionally
+          receita: ((c.metas.receita / c.diasUteis) * workingDaysInRange),
           ligacoes_whatsapp: (c.metas.ligacoes_whatsapp / c.diasUteis) * workingDaysInRange,
           tempo_em_linha: (c.metas.tempo_em_linha / c.diasUteis) * workingDaysInRange,
         },
@@ -304,8 +304,8 @@ export default function App() {
           reunioes: c.metas.reunioes * workingDaysInRange,
           proposta: (c.metas.proposta ?? 0) * workingDaysInRange,
           contratos: c.metas.contratos * workingDaysInRange,
-          receita: c.metas.receita * workingDaysInRange,
           // Monthly totals - scale proportionally
+          receita: ((c.metas.receita / c.diasUteis) * workingDaysInRange),
           mrr: ((c.metas.mrr ?? 0) / c.diasUteis) * workingDaysInRange,
           arr: ((c.metas.arr ?? 0) / c.diasUteis) * workingDaysInRange,
         },
