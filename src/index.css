@@ -664,6 +664,70 @@ input {
   gap: 14px;
 }
 
+/* ─── Pace Section (TotalCard) ──────────────────────────────────── */
+.pace-section {
+  background: rgba(255, 77, 0, 0.08);
+  border: 1px solid rgba(255, 77, 0, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.pace-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.pace-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.pace-row:last-child {
+  margin-bottom: 0;
+}
+
+.pace-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.pace-value {
+  color: var(--text);
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.pace-saude {
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 77, 0, 0.1);
+}
+
+.pace-saude-value {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.saude-good {
+  color: var(--success);
+}
+
+.saude-warn {
+  color: var(--warning);
+}
+
+.saude-bad {
+  color: var(--danger);
+}
+
 /* ─── Pace Liderança Tab ────────────────────────────────────────── */
 .pace-lideranca-tab {
   display: flex;

@@ -582,6 +582,8 @@ export default function App() {
             configs={periodSDRConfigs}
             periodLabel={periodLabel}
             periodDays={days}
+            startDate={startDate}
+            endDate={endDate}
           />
           <TotalCard
             type="closer"
@@ -589,6 +591,8 @@ export default function App() {
             configs={periodCloserConfigs}
             periodLabel={periodLabel}
             periodDays={days}
+            startDate={startDate}
+            endDate={endDate}
           />
         </div>
       </section>

@@ -1,5 +1,5 @@
 import { SDRData, CloserData, SDRConfig, CloserConfig } from '../types';
-import { formatCurrency } from '../utils';
+import { formatCurrency, calculatePaceForDateRange, limitDecimals } from '../utils';
 import ProgressBar from './ProgressBar';
 
 // Force rebuild - includes MRR/ARR totals for Closer Performance Geral (v2)
@@ -11,6 +11,8 @@ interface TotalCardSDR {
   configs: SDRConfig[];
   periodLabel?: string;
   periodDays?: number;
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string;   // YYYY-MM-DD
 }
 
 interface TotalCardCloser {
@@ -19,6 +21,8 @@ interface TotalCardCloser {
   configs: CloserConfig[];
   periodLabel?: string;
   periodDays?: number;
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string;   // YYYY-MM-DD
 }
 
 type TotalCardProps = TotalCardSDR | TotalCardCloser;
@@ -68,6 +72,12 @@ export default function TotalCard(props: TotalCardProps) {
     const pctClass = getPctClass(overallPct);
     const activeCount = allData.filter((d) => d !== null).length;
 
+    // Calcula o pace se datas forem fornecidas
+    let paceInfo = null;
+    if (props.startDate && props.endDate && metas.leads > 0) {
+      paceInfo = calculatePaceForDateRange(metas.leads, props.startDate, props.endDate, totals.leads);
+    }
+
     return (
       <div className="total-card">
         <div className="total-card-left">
@@ -82,6 +92,30 @@ export default function TotalCard(props: TotalCardProps) {
           )}
         </div>
         <div className="total-card-right">
+          {/* Seção de Pace */}
+          {paceInfo && (
+            <div className="pace-section">
+              <div className="pace-title">Leads (Pace do Período)</div>
+              <div className="pace-row">
+                <span className="pace-label">Realizado:</span>
+                <span className="pace-value">{Math.round(totals.leads)}</span>
+              </div>
+              <div className="pace-row">
+                <span className="pace-label">Pace esperado:</span>
+                <span className="pace-value">{Math.round(paceInfo.paceEsperado)}</span>
+              </div>
+              <div className="pace-row">
+                <span className="pace-label">Dias úteis:</span>
+                <span className="pace-value">{paceInfo.diasUteis}</span>
+              </div>
+              <div className="pace-row pace-saude">
+                <span className="pace-label">Saúde:</span>
+                <span className={`pace-saude-value ${paceInfo.saude >= 100 ? 'saude-good' : paceInfo.saude >= 50 ? 'saude-warn' : 'saude-bad'}`}>
+                  {limitDecimals(paceInfo.saude, 2)}%
+                </span>
+              </div>
+            </div>
+          )}
           <ProgressBar value={totals.leads} max={metas.leads} label="Leads (Total)" />
           <ProgressBar
             value={totals.ligacoes_whatsapp}
@@ -129,6 +163,12 @@ export default function TotalCard(props: TotalCardProps) {
   const pctClass = getPctClass(overallPct);
   const activeCount = allData.filter((d) => d !== null).length;
 
+  // Calcula o pace se datas forem fornecidas
+  let paceInfo = null;
+  if (props.startDate && props.endDate && metas.reunioes > 0) {
+    paceInfo = calculatePaceForDateRange(metas.reunioes, props.startDate, props.endDate, totals.reunioes);
+  }
+
   return (
     <div className="total-card closer-card">
       <div className="total-card-left">
@@ -143,6 +183,30 @@ export default function TotalCard(props: TotalCardProps) {
         )}
       </div>
       <div className="total-card-right">
+        {/* Seção de Pace */}
+        {paceInfo && (
+          <div className="pace-section">
+            <div className="pace-title">Reuniões (Pace do Período)</div>
+            <div className="pace-row">
+              <span className="pace-label">Realizado:</span>
+              <span className="pace-value">{limitDecimals(totals.reunioes, 2)}</span>
+            </div>
+            <div className="pace-row">
+              <span className="pace-label">Pace esperado:</span>
+              <span className="pace-value">{limitDecimals(paceInfo.paceEsperado, 2)}</span>
+            </div>
+            <div className="pace-row">
+              <span className="pace-label">Dias úteis:</span>
+              <span className="pace-value">{paceInfo.diasUteis}</span>
+            </div>
+            <div className="pace-row pace-saude">
+              <span className="pace-label">Saúde:</span>
+              <span className={`pace-saude-value ${paceInfo.saude >= 100 ? 'saude-good' : paceInfo.saude >= 50 ? 'saude-warn' : 'saude-bad'}`}>
+                {limitDecimals(paceInfo.saude, 2)}%
+              </span>
+            </div>
+          </div>
+        )}
         <ProgressBar
           value={totals.reunioes}
           max={metas.reunioes}
