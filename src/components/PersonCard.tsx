@@ -219,16 +219,14 @@ export default function PersonCard(props: PersonCardProps) {
         <ProgressBar value={eff.contratos} max={cfg.metas.contratos} label="Contrato Assinado" formatValue={(v) => v.toFixed(2)} />
       </div>
 
-      {/* Additional metrics without metas */}
-      <div className="card-additional-metrics">
-        <div className="metric-simple">
-          <span className="metric-simple-label">MRR</span>
-          <span className="metric-simple-value">{formatCurrency(eff.mrr ?? 0)}</span>
-        </div>
-        <div className="metric-simple">
-          <span className="metric-simple-label">ARR</span>
-          <span className="metric-simple-value">{formatCurrency(eff.arr ?? 0)}</span>
-        </div>
+      <div className="card-metrics">
+        <ProgressBar
+          value={eff.receita}
+          max={cfg.metas.receita}
+          label="Pago"
+          formatValue={formatCurrency}
+          isCurrency
+        />
       </div>
 
       {/* Seção de Pace */}

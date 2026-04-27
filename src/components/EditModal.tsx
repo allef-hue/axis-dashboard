@@ -57,10 +57,6 @@ export default function EditModal(props: EditModalProps) {
         reunioes: d ? String(d.reunioes) : '',
         contratos: d ? String(d.contratos) : '',
         receita: d ? String(d.receita) : '',
-        vendas: d ? String(d.vendas ?? 0) : '',
-        arr: d ? String(d.arr ?? 0) : '',
-        mrr: d ? String(d.mrr ?? 0) : '',
-        valor_recebido: d ? String(d.valor_recebido ?? 0) : '',
       });
     }
     setErrors({});
@@ -70,7 +66,7 @@ export default function EditModal(props: EditModalProps) {
   const fieldKeys =
     type === 'sdr'
       ? ['leads', 'agendamentos', 'acontecidas', 'receita', 'ligacoes_whatsapp', 'tempo_em_linha', 'rqa']
-      : ['reunioes', 'contratos', 'receita', 'vendas', 'arr', 'mrr', 'valor_recebido'];
+      : ['reunioes', 'contratos', 'receita'];
 
   const sdrMetas = type === 'sdr' ? (config as SDRConfig).metas : null;
   const closerMetas = type === 'closer' ? (config as CloserConfig).metas : null;
@@ -85,10 +81,6 @@ export default function EditModal(props: EditModalProps) {
     rqa: 'RQA (Qualidade de Atendimento)',
     reunioes: 'Reuniões Recebidas',
     contratos: 'Contratos Assinados',
-    vendas: 'Quantidade de Vendas',
-    arr: 'ARR (R$)',
-    mrr: 'MRR (R$)',
-    valor_recebido: 'Valor Recebido (R$)',
   };
 
   const fieldHints: Record<string, string> = {
@@ -98,30 +90,24 @@ export default function EditModal(props: EditModalProps) {
     receita:
       type === 'sdr'
         ? `Meta diária: ${formatCurrency(sdrMetas?.receita ?? 0)} de receita originada`
-        : `Meta diária: ${formatCurrency(closerMetas?.receita ?? 0)} de receita gerada`,
+        : `Meta diária: ${formatCurrency(closerMetas?.receita ?? 0)} de receita paga`,
     ligacoes_whatsapp: `Meta mensal: ${sdrMetas?.ligacoes_whatsapp ?? ''} ligações`,
     tempo_em_linha: `Meta mensal: ${sdrMetas?.tempo_em_linha ?? ''} minutos`,
     rqa: `Meta mensal: ${sdrMetas?.rqa ?? '10'} de RQA`,
     reunioes: `Meta diária: ${closerMetas?.reunioes ?? ''} reuniões`,
     contratos: `Meta diária: ${closerMetas?.contratos ?? ''} contratos`,
-    vendas: 'Quantidade de vendas realizadas',
-    arr: 'Annual Recurring Revenue',
-    mrr: 'Monthly Recurring Revenue',
-    valor_recebido: 'Valor total recebido',
   };
 
   const fieldPlaceholders: Record<string, string> = {
     leads: '0', agendamentos: '0', acontecidas: '0',
     receita: '0,00', ligacoes_whatsapp: '0', tempo_em_linha: '0', rqa: '0',
     reunioes: '0', contratos: '0',
-    vendas: '0', arr: '0,00', mrr: '0,00', valor_recebido: '0,00',
   };
 
   const fieldSteps: Record<string, string> = {
     leads: '1', agendamentos: '1', acontecidas: '1',
     receita: '0.01', ligacoes_whatsapp: '1', tempo_em_linha: '1', rqa: '0.1',
     reunioes: '0.5', contratos: '0.01',
-    vendas: '1', arr: '0.01', mrr: '0.01', valor_recebido: '0.01',
   };
 
   function handleChange(key: string, val: string) {
@@ -180,10 +166,6 @@ export default function EditModal(props: EditModalProps) {
         reunioes: parseVal(fields.reunioes),
         contratos: parseVal(fields.contratos),
         receita: parseVal(fields.receita),
-        vendas: parseVal(fields.vendas),
-        arr: parseVal(fields.arr),
-        mrr: parseVal(fields.mrr),
-        valor_recebido: parseVal(fields.valor_recebido),
         updatedAt: now,
       }, selectedDate);
     }
