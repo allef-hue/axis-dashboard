@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { DayData, SDRData, CloserData, SDRConfig, CloserConfig, LeadershipGoals } from './types';
 import {
   loadSDRConfigs,
@@ -8,6 +8,7 @@ import {
 } from './configStorage';
 import {
   saveDayData,
+  getDayData,
   getDateRange,
   getAggregatedData,
   applyImportRows,
@@ -122,6 +123,13 @@ export default function App() {
 
   const isSingleDay = startDate === endDate;
 
+  // Ref para startDate — permite que o callback de Realtime acesse a data atual
+  // SEM precisar recriar a subscription toda vez que a data muda
+  const startDateRef = useRef(startDate);
+  useEffect(() => {
+    startDateRef.current = startDate;
+  }, [startDate]);
+
   // Carrega metas de liderança + configs do time do cloud na inicialização
   useEffect(() => {
     loadLeadershipGoalsCloud().then((goals) => {
@@ -137,18 +145,20 @@ export default function App() {
   }, []);
 
   // Setup Realtime subscriptions para sincronização em tempo real
+  // ⚠️ IMPORTANTE: deps array vazio — subscription criada UMA vez e nunca recriada.
+  // Usamos startDateRef para acessar a data atual sem recriar a subscription.
   useEffect(() => {
     if (!isSupabaseConfigured) {
       console.log('[App] Supabase não configurado, realtime desabilitado');
       return;
     }
 
-    console.log('[App] Configurando Realtime subscriptions...');
+    console.log('[App] Configurando Realtime subscriptions (única vez)...');
 
     const handleDataChange = (date: string, newDayData: DayData) => {
       console.log('[App] onDataChange notificado para', date);
-      // Se o usuário está vendo essa data, atualiza
-      if (date === startDate) {
+      // Usa ref para checar data atual — sem precisar recriar a subscription
+      if (date === startDateRef.current) {
         setDayData(newDayData);
       }
       // Sempre atualiza o importRefresh para recalcular dados agregados
@@ -172,12 +182,12 @@ export default function App() {
     // Setup e retorna cleanup function
     const cleanup = setupRealtimeSubscriptions(handleDataChange, handleGoalsChange);
 
-    // Cleanup ao desmontar
+    // Cleanup ao desmontar o componente (não ao trocar de data)
     return () => {
       console.log('[App] Limpando Realtime subscriptions...');
       cleanup();
     };
-  }, [startDate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize Sync callbacks for UI feedback
   useEffect(() => {
@@ -389,9 +399,22 @@ export default function App() {
     [dayData, startDate]
   );
 
-  const handleImportConfirm = useCallback((rows: ImportRow[]) => {
+  const handleImportConfirm = useCallback(async (rows: ImportRow[]) => {
+    // 1. Salvar no localStorage (imediato)
     applyImportRows(rows);
     setImportRefresh((n) => n + 1);
+
+    // 2. Sincronizar com Supabase para que outros usuários vejam
+    if (isSupabaseConfigured) {
+      const datesAffected = [...new Set(rows.map((r) => r.date))];
+      for (const date of datesAffected) {
+        const dayData = getDayData(date);
+        if (dayData) {
+          saveDayDataCloud(date, dayData); // async em background
+        }
+      }
+      console.log('[Import] Dados sincronizados com Supabase:', datesAffected);
+    }
   }, []);
 
   const handleExportCSV = useCallback(() => {

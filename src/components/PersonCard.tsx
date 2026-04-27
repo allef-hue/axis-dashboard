@@ -5,7 +5,6 @@ import {
   formatCurrency, formatTime,
   calculatePaceForDateRange, limitDecimals,
 } from '../utils';
-import { usePermission } from '../context/PermissionContext';
 import StatusBadge from './StatusBadge';
 import ProgressBar from './ProgressBar';
 
@@ -45,7 +44,6 @@ function getPctClass(pct: number): string {
 
 export default function PersonCard(props: PersonCardProps) {
   const { type, config, monthlyConfig, data, isPeriodView, daysWithData, onEdit, onHistory } = props;
-  const { canEdit } = usePermission();
 
   if (type === 'sdr') {
     const cfg = config as SDRConfig;
@@ -170,18 +168,11 @@ export default function PersonCard(props: PersonCardProps) {
           <button
             className="btn-edit"
             onClick={onEdit}
-            disabled={!canEdit(cfg.email)}
-            title={canEdit(cfg.email) ? '' : 'Apenas você ou admin pode editar'}
           >
             {isPeriodView ? '✎ Meu Pace' : 'Meu Pace'}
           </button>
           <button className="btn-history" onClick={onHistory}>Histórico</button>
         </div>
-        {!canEdit(cfg.email) && (
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '6px' }}>
-            Apenas leitura
-          </div>
-        )}
       </div>
     );
   }
@@ -293,18 +284,11 @@ export default function PersonCard(props: PersonCardProps) {
         <button
           className="btn-edit"
           onClick={onEdit}
-          disabled={!canEdit(cfg.email)}
-          title={canEdit(cfg.email) ? '' : 'Apenas você ou admin pode editar'}
         >
           {isPeriodView ? '✎ Meu Pace' : 'Meu Pace'}
         </button>
         <button className="btn-history" onClick={onHistory}>Histórico</button>
       </div>
-      {!canEdit(cfg.email) && (
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '6px' }}>
-          Apenas leitura
-        </div>
-      )}
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { SDRConfig, CloserConfig, LeadershipGoals } from '../types';
 import { generateUniqueId } from '../configStorage';
 import { parseImportCSV, generateCSVTemplate, ImportRow, ImportPreview } from '../storage';
 import { formatDate } from '../utils';
-import { usePermission } from '../context/PermissionContext';
 
 interface SettingsModalProps {
   sdrConfigs: SDRConfig[];
@@ -39,30 +38,6 @@ export default function SettingsModal({
   startDate,
   endDate,
 }: SettingsModalProps) {
-  const { user } = usePermission();
-
-  // Se não é admin, não deixa acessar
-  if (!user.isAdmin) {
-    return (
-      <div className="modal-backdrop" onClick={onClose}>
-        <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h2>Acesso Negado</h2>
-            <button className="modal-close" onClick={onClose}>×</button>
-          </div>
-          <div className="modal-body" style={{ padding: '20px', textAlign: 'center' }}>
-            <p style={{ marginBottom: '20px' }}>
-              Apenas administradores podem acessar as configurações.
-            </p>
-            <button className="btn-primary" onClick={onClose} style={{ padding: '10px 20px' }}>
-              Fechar
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const [tab, setTab] = useState<Tab>('sdr');
   const [localSdr, setLocalSdr] = useState<SDRConfig[]>(() => cloneSdr(sdrConfigs));
   const [localCloser, setLocalCloser] = useState<CloserConfig[]>(() => cloneCloser(closerConfigs));
