@@ -57,12 +57,6 @@ export default function PersonCard(props: PersonCardProps) {
     const status = getSDRStatus(eff, cfg.metas);
     const pct = getSDRPercent(eff, cfg.metas);
 
-    // Calcula o pace se datas forem fornecidas
-    let paceInfo = null;
-    if (props.startDate && props.endDate && cfg.metas.leads > 0) {
-      paceInfo = calculatePaceForDateRange(cfg.metas.leads, props.startDate, props.endDate, eff.leads);
-    }
-
     return (
       <div className={`person-card status-${status}`}>
         <div className="card-header">
@@ -112,30 +106,6 @@ export default function PersonCard(props: PersonCardProps) {
           />
         </div>
 
-        {/* Seção de Pace */}
-        {paceInfo && (
-          <div className="pace-section">
-            <div className="pace-title">Leads (Pace do Período)</div>
-            <div className="pace-row">
-              <span className="pace-label">Realizado:</span>
-              <span className="pace-value">{Math.round(eff.leads)}</span>
-            </div>
-            <div className="pace-row">
-              <span className="pace-label">Pace esperado:</span>
-              <span className="pace-value">{Math.round(paceInfo.paceEsperado)}</span>
-            </div>
-            <div className="pace-row">
-              <span className="pace-label">Dias úteis:</span>
-              <span className="pace-value">{paceInfo.diasUteis}</span>
-            </div>
-            <div className="pace-row pace-saude">
-              <span className="pace-label">Saúde:</span>
-              <span className={`pace-saude-value ${paceInfo.saude >= 100 ? 'saude-good' : paceInfo.saude >= 50 ? 'saude-warn' : 'saude-bad'}`}>
-                {limitDecimals(paceInfo.saude, 2)}%
-              </span>
-            </div>
-          </div>
-        )}
 
         {isPeriodView && monthlyConfig && (
           <div className="card-gap-row">
