@@ -95,8 +95,8 @@ export default function PersonCard(props: PersonCardProps) {
             label="Tempo em Linha"
             formatValue={(v) => `${Math.round(v)} min`}
           />
-          <ProgressBar value={eff.agendamentos} max={cfg.metas.agendamentos} label="Agendamentos" />
-          <ProgressBar value={eff.acontecidas} max={cfg.metas.acontecidas} label="Acontecidas" />
+          <ProgressBar value={eff.agendamentos} max={cfg.metas.agendamentos} label="Agendamentos" formatValue={(v) => v.toFixed(2)} />
+          <ProgressBar value={eff.acontecidas} max={cfg.metas.acontecidas} label="Acontecidas" formatValue={(v) => v.toFixed(2)} />
           <ProgressBar
             value={eff.rqa ?? 0}
             max={cfg.metas.rqa ?? 10}

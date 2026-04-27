@@ -129,8 +129,8 @@ export default function TotalCard(props: TotalCardProps) {
             label="Tempo em Linha (Total)"
             formatValue={(v) => `${Math.round(v)} min`}
           />
-          <ProgressBar value={totals.agendamentos} max={metas.agendamentos} label="Agendamentos (Total)" />
-          <ProgressBar value={totals.acontecidas} max={metas.acontecidas} label="Acontecidas (Total)" />
+          <ProgressBar value={totals.agendamentos} max={metas.agendamentos} label="Agendamentos (Total)" formatValue={(v) => v.toFixed(2)} />
+          <ProgressBar value={totals.acontecidas} max={metas.acontecidas} label="Acontecidas (Total)" formatValue={(v) => v.toFixed(2)} />
           <ProgressBar value={totals.rqa} max={metas.rqa || 50} label="RQA (Total)" formatValue={(v) => v.toFixed(1)} />
           <ProgressBar value={totals.receita} max={metas.receita} label="Pago (Total)" formatValue={formatCurrency} isCurrency />
         </div>
