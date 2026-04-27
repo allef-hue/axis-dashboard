@@ -6,6 +6,7 @@ import {
 import { SDRConfig, CloserConfig, SDRData, CloserData, LeadershipGoals } from '../types';
 import { formatCurrency } from '../utils';
 import AlertsSection from './AlertsSection';
+import TotalCard from './TotalCard';
 
 interface RelatorioTabProps {
   sdrConfigs: SDRConfig[];
@@ -64,6 +65,8 @@ export default function RelatorioTab({
   closerDataArray,
   periodSDRConfigs,
   periodCloserConfigs,
+  startDate,
+  endDate,
   isPeriodView,
   daysWithAnyData,
 }: RelatorioTabProps) {
@@ -172,6 +175,30 @@ export default function RelatorioTab({
         isPeriodView={isPeriodView}
         daysWithAnyData={daysWithAnyData}
       />
+
+      {/* ─── Performance Geral Cards ──────────────────── */}
+      <section className="performance-overview-section">
+        <div className="performance-cards-grid">
+          <TotalCard
+            type="sdr"
+            allData={sdrDataArray}
+            configs={periodSDRConfigs}
+            periodLabel={`${sdrDataArray.filter(d => d !== null).length} dia(s)`}
+            periodDays={1}
+            startDate={startDate}
+            endDate={endDate}
+          />
+          <TotalCard
+            type="closer"
+            allData={closerDataArray}
+            configs={periodCloserConfigs}
+            periodLabel={`${closerDataArray.filter(d => d !== null).length} dia(s)`}
+            periodDays={1}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        </div>
+      </section>
 
       {/* ─── Resumo Geral ─────────────────────────────── */}
       <section className="relatorio-section">

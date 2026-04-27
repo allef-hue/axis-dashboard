@@ -35,7 +35,6 @@ import { todayString, formatDate, countWorkingDays } from './utils';
 
 import Header from './components/Header';
 import PersonCard from './components/PersonCard';
-import TotalCard from './components/TotalCard';
 import EditModal from './components/EditModal';
 import AuditHistoryModal from './components/AuditHistoryModal';
 import SettingsModal from './components/SettingsModal';
@@ -618,29 +617,6 @@ export default function App() {
 
       {/* Sync API4com - disabled for now */}
 
-      {/* Performance Overview Section */}
-      <section className="performance-overview-section">
-        <div className="performance-cards-grid">
-          <TotalCard
-            type="sdr"
-            allData={effectiveSDRData}
-            configs={periodSDRConfigs}
-            periodLabel={periodLabel}
-            periodDays={days}
-            startDate={startDate}
-            endDate={endDate}
-          />
-          <TotalCard
-            type="closer"
-            allData={effectiveCloserData}
-            configs={periodCloserConfigs}
-            periodLabel={periodLabel}
-            periodDays={days}
-            startDate={startDate}
-            endDate={endDate}
-          />
-        </div>
-      </section>
 
       {/* SDR Section */}
       <section className="sdr-section">
