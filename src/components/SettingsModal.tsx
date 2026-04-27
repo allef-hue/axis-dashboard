@@ -17,7 +17,7 @@ interface SettingsModalProps {
   endDate?: string;
 }
 
-type Tab = 'sdr' | 'closer' | 'lideranca' | 'import-export';
+type Tab = 'sdr' | 'closer' | 'lideranca' | 'administrativo' | 'import-export';
 
 const NEW_PREFIX = '_new_';
 
@@ -342,6 +342,12 @@ export default function SettingsModal({
                 onClick={() => setTab('lideranca')}
               >
                 Metas Gerais
+              </button>
+              <button
+                className={`settings-tab ${tab === 'administrativo' ? 'active' : ''}`}
+                onClick={() => setTab('administrativo')}
+              >
+                👤 Administrativo
               </button>
               <button
                 className={`settings-tab ${tab === 'import-export' ? 'active' : ''}`}
@@ -796,6 +802,94 @@ export default function SettingsModal({
                     />
                   </div>
                 </div>
+              </div>
+            </>
+          )}
+
+          {tab === 'administrativo' && (
+            <>
+              <div className="settings-hint">
+                Gerenciar admins e usuários autorizados.
+              </div>
+
+              <div style={{ marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '12px', color: 'var(--text)' }}>
+                  👤 Admins Autorizados
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                  Emails que podem acessar Configurações e gerenciar usuários:
+                </p>
+                <div style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                  padding: '12px',
+                  marginBottom: '12px',
+                  minHeight: '60px'
+                }}>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text)' }}>
+                    <div style={{ fontWeight: '500', marginBottom: '8px' }}>
+                      ✓ allef@grupovorp.com (Você - Admin)
+                    </div>
+                  </div>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                    💡 Futura expansão: Adicionar/remover admins graficamente
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '12px', color: 'var(--text)' }}>
+                  📋 Mapeamento de Emails
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                  Cada pessoa tem um email para login:
+                </p>
+                <div style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                  padding: '12px',
+                  fontSize: '0.8rem',
+                  maxHeight: '200px',
+                  overflowY: 'auto'
+                }}>
+                  {localSdr.map((cfg) => (
+                    <div key={cfg.id} style={{ marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: 'var(--text)' }}>{cfg.nome}:</span>
+                      <span style={{ color: 'var(--primary)', fontFamily: 'monospace' }}>
+                        {cfg.email || '(não configurado)'}
+                      </span>
+                    </div>
+                  ))}
+                  {localCloser.map((cfg) => (
+                    <div key={cfg.id} style={{ marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: 'var(--text)' }}>{cfg.nome}:</span>
+                      <span style={{ color: 'var(--primary)', fontFamily: 'monospace' }}>
+                        {cfg.email || '(não configurado)'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{
+                background: 'rgba(0, 150, 255, 0.05)',
+                border: '1px solid rgba(0, 150, 255, 0.15)',
+                borderRadius: '6px',
+                padding: '12px',
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)'
+              }}>
+                <div style={{ fontWeight: '500', marginBottom: '8px', color: 'var(--text)' }}>
+                  ℹ️ Como Funciona:
+                </div>
+                <ul style={{ margin: '0 0 0 16px', padding: 0, lineHeight: '1.6' }}>
+                  <li>👤 Apenas admins acessam Configurações</li>
+                  <li>✏️ Admin edita emails de cada pessoa na aba Equipe SDR/Closer</li>
+                  <li>🔒 Usuário só edita seu próprio card (matched by email)</li>
+                  <li>👁️ Usuário vê todos os cards mas não pode editar outros</li>
+                </ul>
               </div>
             </>
           )}
