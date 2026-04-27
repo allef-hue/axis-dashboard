@@ -101,7 +101,7 @@ export default function EditModal(props: EditModalProps) {
         : `Meta diária: ${formatCurrency(closerMetas?.receita ?? 0)} de receita gerada`,
     ligacoes_whatsapp: `Meta mensal: ${sdrMetas?.ligacoes_whatsapp ?? ''} ligações`,
     tempo_em_linha: `Meta mensal: ${sdrMetas?.tempo_em_linha ?? ''} minutos`,
-    rqa: `Meta diária: ${sdrMetas?.rqa ?? '10'} de RQA`,
+    rqa: `Meta mensal: ${sdrMetas?.rqa ?? '10'} de RQA`,
     reunioes: `Meta diária: ${closerMetas?.reunioes ?? ''} reuniões`,
     contratos: `Meta diária: ${closerMetas?.contratos ?? ''} contratos`,
     vendas: 'Quantidade de vendas realizadas',
