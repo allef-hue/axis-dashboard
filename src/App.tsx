@@ -613,6 +613,8 @@ export default function App() {
                 data={filteredSDRData[i]}
                 isPeriodView={isPeriodView}
                 daysWithData={aggregated?.sdrs[cfg.id]?.daysWithData}
+                startDate={startDate}
+                endDate={endDate}
                 onEdit={() => handleEditPerson(cfg.id, 'sdr')}
                 onHistory={() => setHistoryPerson({ id: cfg.id, type: 'sdr' })}
               />
@@ -636,6 +638,8 @@ export default function App() {
                 data={filteredCloserData[i]}
                 isPeriodView={isPeriodView}
                 daysWithData={aggregated?.closers[cfg.id]?.daysWithData}
+                startDate={startDate}
+                endDate={endDate}
                 onEdit={() => handleEditPerson(cfg.id, 'closer')}
                 onHistory={() => setHistoryPerson({ id: cfg.id, type: 'closer' })}
               />

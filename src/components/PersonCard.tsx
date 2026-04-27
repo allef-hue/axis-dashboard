@@ -3,6 +3,7 @@ import {
   getSDRStatus, getCloserStatus,
   getSDRPercent, getCloserPercent,
   formatCurrency, formatTime,
+  calculatePaceForDateRange, limitDecimals,
 } from '../utils';
 import StatusBadge from './StatusBadge';
 import ProgressBar from './ProgressBar';
@@ -14,6 +15,8 @@ interface PersonCardSDR {
   data: SDRData | null;
   isPeriodView?: boolean;
   daysWithData?: number;
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string;   // YYYY-MM-DD
   onEdit: () => void;
   onHistory: () => void;
 }
@@ -25,6 +28,8 @@ interface PersonCardCloser {
   data: CloserData | null;
   isPeriodView?: boolean;
   daysWithData?: number;
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string;   // YYYY-MM-DD
   onEdit: () => void;
   onHistory: () => void;
 }
@@ -51,6 +56,12 @@ export default function PersonCard(props: PersonCardProps) {
     };
     const status = getSDRStatus(eff, cfg.metas);
     const pct = getSDRPercent(eff, cfg.metas);
+
+    // Calcula o pace se datas forem fornecidas
+    let paceInfo = null;
+    if (props.startDate && props.endDate && cfg.metas.leads > 0) {
+      paceInfo = calculatePaceForDateRange(cfg.metas.leads, props.startDate, props.endDate, eff.leads);
+    }
 
     return (
       <div className={`person-card status-${status}`}>
@@ -101,6 +112,31 @@ export default function PersonCard(props: PersonCardProps) {
           />
         </div>
 
+        {/* Seção de Pace */}
+        {paceInfo && (
+          <div className="pace-section">
+            <div className="pace-title">Leads (Pace do Período)</div>
+            <div className="pace-row">
+              <span className="pace-label">Realizado:</span>
+              <span className="pace-value">{Math.round(eff.leads)}</span>
+            </div>
+            <div className="pace-row">
+              <span className="pace-label">Pace esperado:</span>
+              <span className="pace-value">{Math.round(paceInfo.paceEsperado)}</span>
+            </div>
+            <div className="pace-row">
+              <span className="pace-label">Dias úteis:</span>
+              <span className="pace-value">{paceInfo.diasUteis}</span>
+            </div>
+            <div className="pace-row pace-saude">
+              <span className="pace-label">Saúde:</span>
+              <span className={`pace-saude-value ${paceInfo.saude >= 100 ? 'saude-good' : paceInfo.saude >= 50 ? 'saude-warn' : 'saude-bad'}`}>
+                {limitDecimals(paceInfo.saude, 2)}%
+              </span>
+            </div>
+          </div>
+        )}
+
         {isPeriodView && monthlyConfig && (
           <div className="card-gap-row">
             <div className="gap-label">Gap vs. Esperado:</div>
@@ -150,6 +186,12 @@ export default function PersonCard(props: PersonCardProps) {
   const status = getCloserStatus(eff, cfg.metas);
   const pct = getCloserPercent(eff, cfg.metas);
 
+  // Calcula o pace se datas forem fornecidas
+  let closerPaceInfo = null;
+  if (props.startDate && props.endDate && cfg.metas.reunioes > 0) {
+    closerPaceInfo = calculatePaceForDateRange(cfg.metas.reunioes, props.startDate, props.endDate, eff.reunioes);
+  }
+
   return (
     <div className={`person-card status-${status}`}>
       <div className="card-header">
@@ -185,6 +227,31 @@ export default function PersonCard(props: PersonCardProps) {
           <span className="metric-simple-value">{formatCurrency(eff.arr ?? 0)}</span>
         </div>
       </div>
+
+      {/* Seção de Pace */}
+      {closerPaceInfo && (
+        <div className="pace-section">
+          <div className="pace-title">Reuniões (Pace do Período)</div>
+          <div className="pace-row">
+            <span className="pace-label">Realizado:</span>
+            <span className="pace-value">{limitDecimals(eff.reunioes, 2)}</span>
+          </div>
+          <div className="pace-row">
+            <span className="pace-label">Pace esperado:</span>
+            <span className="pace-value">{limitDecimals(closerPaceInfo.paceEsperado, 2)}</span>
+          </div>
+          <div className="pace-row">
+            <span className="pace-label">Dias úteis:</span>
+            <span className="pace-value">{closerPaceInfo.diasUteis}</span>
+          </div>
+          <div className="pace-row pace-saude">
+            <span className="pace-label">Saúde:</span>
+            <span className={`pace-saude-value ${closerPaceInfo.saude >= 100 ? 'saude-good' : closerPaceInfo.saude >= 50 ? 'saude-warn' : 'saude-bad'}`}>
+              {limitDecimals(closerPaceInfo.saude, 2)}%
+            </span>
+          </div>
+        </div>
+      )}
 
       {isPeriodView && monthlyConfig && (
         <div className="card-gap-row">
