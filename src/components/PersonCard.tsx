@@ -3,7 +3,6 @@ import {
   getSDRStatus, getCloserStatus,
   getSDRPercent, getCloserPercent,
   formatCurrency, formatTime,
-  calculatePaceForDateRange, limitDecimals,
 } from '../utils';
 import StatusBadge from './StatusBadge';
 import ProgressBar from './ProgressBar';
