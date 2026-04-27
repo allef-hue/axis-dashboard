@@ -36,6 +36,7 @@ export type Status = 'no_pace' | 'atencao' | 'critico';
 export interface SDRConfig {
   id: string;
   nome: string;
+  email?: string; // Email do usuário que pode editar este card (ex: jose@grupovorp.com)
   diasUteis: number; // Dias úteis no mês (para cálculo de pace)
   metas: {
     leads: number;
@@ -51,6 +52,7 @@ export interface SDRConfig {
 export interface CloserConfig {
   id: string;
   nome: string;
+  email?: string; // Email do usuário que pode editar este card (ex: allef@grupovorp.com)
   diasUteis: number; // Dias úteis no mês
   metas: {
     reunioes: number;

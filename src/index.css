@@ -549,9 +549,16 @@ input {
   text-align: center;
 }
 
-.btn-edit:hover {
+.btn-edit:hover:not(:disabled) {
   background: var(--primary);
   color: #fff;
+}
+
+.btn-edit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--border);
+  color: var(--text-secondary);
 }
 
 .btn-history {

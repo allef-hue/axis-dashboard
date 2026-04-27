@@ -28,6 +28,7 @@ import {
 } from './db';
 import { setupRealtimeSubscriptions } from './realtime';
 import { SyncProvider } from './context/SyncContext';
+import { PermissionProvider } from './context/PermissionContext';
 // import { syncAPI4ComForDate } from './api4comSync';
 import { todayString, formatDate, countWorkingDays } from './utils';
 
@@ -459,8 +460,9 @@ export default function App() {
   }, [isSingleDay]);
 
   return (
-    <SyncProvider>
-      <div className="app">
+    <PermissionProvider>
+      <SyncProvider>
+        <div className="app">
         <Header
           startDate={startDate}
           endDate={endDate}
@@ -754,7 +756,8 @@ export default function App() {
           endDate={endDate}
         />
       )}
-    </div>
-    </SyncProvider>
+        </div>
+      </SyncProvider>
+    </PermissionProvider>
   );
 }

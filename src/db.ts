@@ -474,4 +474,82 @@ export async function getRecentChanges(days: number = 7): Promise<AuditEntry[]> 
   }
 }
 
+// ─── Admin Management ──────────────────────────────────────────
+
+/**
+ * Retorna lista de emails que são admins
+ */
+export async function getAdmins(): Promise<string[]> {
+  if (!isSupabaseConfigured || !supabase) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from('admins')
+      .select('email')
+      .eq('status', 'active');
+
+    if (error) {
+      console.error('[Admins] Erro ao buscar:', error.message);
+      return [];
+    }
+
+    return data?.map((row) => row.email) || [];
+  } catch (e) {
+    console.error('[Admins] getAdmins falhou:', e);
+    return [];
+  }
+}
+
+/**
+ * Adiciona um novo admin
+ */
+export async function addAdmin(email: string, addedBy: string): Promise<{ success: boolean; error?: string }> {
+  if (!isSupabaseConfigured || !supabase) {
+    return { success: false, error: 'Supabase não configurado' };
+  }
+
+  try {
+    const { error } = await supabase
+      .from('admins')
+      .insert([{ email, added_by: addedBy, status: 'active' }]);
+
+    if (error) {
+      if (error.message.includes('duplicate')) {
+        return { success: false, error: 'Este email já é admin' };
+      }
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (e: unknown) {
+    const errorMsg = e instanceof Error ? e.message : 'Erro desconhecido';
+    return { success: false, error: errorMsg };
+  }
+}
+
+/**
+ * Remove um admin
+ */
+export async function removeAdmin(email: string): Promise<{ success: boolean; error?: string }> {
+  if (!isSupabaseConfigured || !supabase) {
+    return { success: false, error: 'Supabase não configurado' };
+  }
+
+  try {
+    const { error } = await supabase
+      .from('admins')
+      .update({ status: 'inactive' })
+      .eq('email', email);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (e: unknown) {
+    const errorMsg = e instanceof Error ? e.message : 'Erro desconhecido';
+    return { success: false, error: errorMsg };
+  }
+}
+
 export { isSupabaseConfigured };

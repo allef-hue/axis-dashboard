@@ -3,6 +3,7 @@ import { SDRConfig, CloserConfig, LeadershipGoals } from '../types';
 import { generateUniqueId } from '../configStorage';
 import { parseImportCSV, generateCSVTemplate, ImportRow, ImportPreview } from '../storage';
 import { formatDate } from '../utils';
+import { usePermission } from '../context/PermissionContext';
 
 interface SettingsModalProps {
   sdrConfigs: SDRConfig[];
@@ -38,6 +39,30 @@ export default function SettingsModal({
   startDate,
   endDate,
 }: SettingsModalProps) {
+  const { user } = usePermission();
+
+  // Se não é admin, não deixa acessar
+  if (!user.isAdmin) {
+    return (
+      <div className="modal-backdrop" onClick={onClose}>
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2>Acesso Negado</h2>
+            <button className="modal-close" onClick={onClose}>×</button>
+          </div>
+          <div className="modal-body" style={{ padding: '20px', textAlign: 'center' }}>
+            <p style={{ marginBottom: '20px' }}>
+              Apenas administradores podem acessar as configurações.
+            </p>
+            <button className="btn-primary" onClick={onClose} style={{ padding: '10px 20px' }}>
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const [tab, setTab] = useState<Tab>('sdr');
   const [localSdr, setLocalSdr] = useState<SDRConfig[]>(() => cloneSdr(sdrConfigs));
   const [localCloser, setLocalCloser] = useState<CloserConfig[]>(() => cloneCloser(closerConfigs));
@@ -70,6 +95,9 @@ export default function SettingsModal({
   const updateSdrName = (i: number, nome: string) =>
     setLocalSdr((prev) => prev.map((c, idx) => (idx === i ? { ...c, nome } : c)));
 
+  const updateSdrEmail = (i: number, email: string) =>
+    setLocalSdr((prev) => prev.map((c, idx) => (idx === i ? { ...c, email } : c)));
+
   const updateSdrMeta = (i: number, key: keyof SDRConfig['metas'], value: string) =>
     setLocalSdr((prev) =>
       prev.map((c, idx) =>
@@ -92,6 +120,9 @@ export default function SettingsModal({
   // ─── Closer handlers ──────────────────────────────────────────
   const updateCloserName = (i: number, nome: string) =>
     setLocalCloser((prev) => prev.map((c, idx) => (idx === i ? { ...c, nome } : c)));
+
+  const updateCloserEmail = (i: number, email: string) =>
+    setLocalCloser((prev) => prev.map((c, idx) => (idx === i ? { ...c, email } : c)));
 
   const updateCloserMeta = (i: number, key: keyof CloserConfig['metas'], value: string) =>
     setLocalCloser((prev) =>
@@ -346,6 +377,7 @@ export default function SettingsModal({
               <div className="settings-table">
                 <div className="settings-table-head">
                   <span className="st-col-name">Nome</span>
+                  <span className="st-col-name" style={{ fontSize: '0.85rem' }}>Email</span>
                   <span className="st-col-meta">Leads</span>
                   <span className="st-col-meta">Agend.</span>
                   <span className="st-col-meta">Acont.</span>
@@ -363,6 +395,13 @@ export default function SettingsModal({
                       placeholder="Nome do vendedor"
                       onChange={(e) => updateSdrName(i, e.target.value)}
                       autoFocus={cfg.id.startsWith(NEW_PREFIX)}
+                    />
+                    <input
+                      className="st-input st-col-name"
+                      value={cfg.email ?? ''}
+                      placeholder="email@grupovorp.com"
+                      onChange={(e) => updateSdrEmail(i, e.target.value)}
+                      style={{ fontSize: '0.85rem' }}
                     />
                     <input
                       className="st-input st-col-meta"
@@ -463,6 +502,7 @@ export default function SettingsModal({
               <div className="settings-table">
                 <div className="settings-table-head">
                   <span className="st-col-name">Nome</span>
+                  <span className="st-col-name" style={{ fontSize: '0.85rem' }}>Email</span>
                   <span className="st-col-meta">Reuniões</span>
                   <span className="st-col-meta">Proposta</span>
                   <span className="st-col-meta">Contratos</span>
@@ -478,6 +518,13 @@ export default function SettingsModal({
                       placeholder="Nome do closer"
                       onChange={(e) => updateCloserName(i, e.target.value)}
                       autoFocus={cfg.id.startsWith(NEW_PREFIX)}
+                    />
+                    <input
+                      className="st-input st-col-name"
+                      value={cfg.email ?? ''}
+                      placeholder="email@grupovorp.com"
+                      onChange={(e) => updateCloserEmail(i, e.target.value)}
+                      style={{ fontSize: '0.85rem' }}
                     />
                     <input
                       className="st-input st-col-meta"
