@@ -195,12 +195,13 @@ async function fetchDayDataRealtime(
           id: personId,
           nome: personData.nome || personId,
           reunioes: personData.reunioes ?? 0,
+          proposta: personData.proposta ?? 0,
           contratos: personData.contratos ?? 0,
           receita: personData.receita ?? 0,
-          vendas: personData.vendas,
-          arr: personData.arr,
-          mrr: personData.mrr,
-          valor_recebido: personData.valor_recebido,
+          vendas: personData.vendas ?? 0,
+          arr: personData.arr ?? 0,
+          mrr: personData.mrr ?? 0,
+          valor_recebido: personData.valor_recebido ?? 0,
           updatedAt: record.updated_at || '',
         };
       }
