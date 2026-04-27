@@ -24,8 +24,10 @@ interface EditModalCloser {
 
 type EditModalProps = EditModalSDR | EditModalCloser;
 
-function validateNumber(val: string): string | null {
-  if (val === '') return 'Campo obrigatório';
+function validateNumber(val: string, isRequired: boolean = true): string | null {
+  if (val === '') {
+    return isRequired ? 'Campo obrigatório' : null; // Campos opcionais podem estar vazios
+  }
   if (isNaN(Number(val.replace(',', '.')))) return 'Deve ser um número';
   if (Number(val.replace(',', '.')) < 0) return 'Não pode ser negativo';
   return null;
@@ -121,17 +123,25 @@ export default function EditModal(props: EditModalProps) {
     mrr: '0.01', arr: '0.01',
   };
 
+  // Campos obrigatórios
+  const requiredFields =
+    type === 'sdr'
+      ? ['leads', 'agendamentos', 'acontecidas', 'receita', 'ligacoes_whatsapp', 'tempo_em_linha']
+      : ['reunioes', 'contratos', 'receita'];
+
   function handleChange(key: string, val: string) {
     setFields((prev) => ({ ...prev, [key]: val }));
     if (touched[key]) {
-      const err = validateNumber(val);
+      const isRequired = requiredFields.includes(key);
+      const err = validateNumber(val, isRequired);
       setErrors((prev) => ({ ...prev, [key]: err ?? '' }));
     }
   }
 
   function handleBlur(key: string) {
     setTouched((prev) => ({ ...prev, [key]: true }));
-    const err = validateNumber(fields[key]);
+    const isRequired = requiredFields.includes(key);
+    const err = validateNumber(fields[key], isRequired);
     setErrors((prev) => ({ ...prev, [key]: err ?? '' }));
   }
 
@@ -139,9 +149,11 @@ export default function EditModal(props: EditModalProps) {
     const newErrors: Record<string, string> = {};
     const newTouched: Record<string, boolean> = {};
     let valid = true;
+
     for (const key of fieldKeys) {
       newTouched[key] = true;
-      const err = validateNumber(fields[key]);
+      const isRequired = requiredFields.includes(key);
+      const err = validateNumber(fields[key], isRequired);
       if (err) { newErrors[key] = err; valid = false; }
     }
     setTouched(newTouched);
@@ -186,7 +198,8 @@ export default function EditModal(props: EditModalProps) {
   }
 
   const hasData = data !== null;
-  const isValid = fieldKeys.every((k) => !errors[k] && fields[k] !== '');
+  const isValid = requiredFields.every((k) => !errors[k] && fields[k] !== '') &&
+                  fieldKeys.every((k) => !errors[k]); // Todos sem erros, mas só required precisam ter valor
 
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
