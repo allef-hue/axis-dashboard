@@ -49,6 +49,7 @@ export default function EditModal(props: EditModalProps) {
         receita: d ? String(d.receita ?? 0) : '',
         ligacoes_whatsapp: d ? String(d.ligacoes_whatsapp ?? 0) : '',
         tempo_em_linha: d ? String(d.tempo_em_linha ?? 0) : '',
+        rqa: d ? String(d.rqa ?? 0) : '',
       });
     } else {
       const d = data as CloserData | null;
@@ -68,7 +69,7 @@ export default function EditModal(props: EditModalProps) {
 
   const fieldKeys =
     type === 'sdr'
-      ? ['leads', 'agendamentos', 'acontecidas', 'receita', 'ligacoes_whatsapp', 'tempo_em_linha']
+      ? ['leads', 'agendamentos', 'acontecidas', 'receita', 'ligacoes_whatsapp', 'tempo_em_linha', 'rqa']
       : ['reunioes', 'contratos', 'receita', 'vendas', 'arr', 'mrr', 'valor_recebido'];
 
   const sdrMetas = type === 'sdr' ? (config as SDRConfig).metas : null;
@@ -81,6 +82,7 @@ export default function EditModal(props: EditModalProps) {
     receita: type === 'sdr' ? 'Receita Originada (R$)' : 'Receita Paga (R$)',
     ligacoes_whatsapp: '☎️ Ligações WhatsApp',
     tempo_em_linha: '⏱️ Tempo em Linha (min)',
+    rqa: 'RQA (Qualidade de Atendimento)',
     reunioes: 'Reuniões Recebidas',
     contratos: 'Contratos Assinados',
     vendas: 'Quantidade de Vendas',
@@ -99,6 +101,7 @@ export default function EditModal(props: EditModalProps) {
         : `Meta diária: ${formatCurrency(closerMetas?.receita ?? 0)} de receita gerada`,
     ligacoes_whatsapp: `Meta mensal: ${sdrMetas?.ligacoes_whatsapp ?? ''} ligações`,
     tempo_em_linha: `Meta mensal: ${sdrMetas?.tempo_em_linha ?? ''} minutos`,
+    rqa: `Meta diária: ${sdrMetas?.rqa ?? '10'} de RQA`,
     reunioes: `Meta diária: ${closerMetas?.reunioes ?? ''} reuniões`,
     contratos: `Meta diária: ${closerMetas?.contratos ?? ''} contratos`,
     vendas: 'Quantidade de vendas realizadas',
@@ -109,14 +112,14 @@ export default function EditModal(props: EditModalProps) {
 
   const fieldPlaceholders: Record<string, string> = {
     leads: '0', agendamentos: '0', acontecidas: '0',
-    receita: '0,00', ligacoes_whatsapp: '0', tempo_em_linha: '0',
+    receita: '0,00', ligacoes_whatsapp: '0', tempo_em_linha: '0', rqa: '0',
     reunioes: '0', contratos: '0',
     vendas: '0', arr: '0,00', mrr: '0,00', valor_recebido: '0,00',
   };
 
   const fieldSteps: Record<string, string> = {
     leads: '1', agendamentos: '1', acontecidas: '1',
-    receita: '0.01', ligacoes_whatsapp: '1', tempo_em_linha: '1',
+    receita: '0.01', ligacoes_whatsapp: '1', tempo_em_linha: '1', rqa: '0.1',
     reunioes: '0.5', contratos: '0.01',
     vendas: '1', arr: '0.01', mrr: '0.01', valor_recebido: '0.01',
   };
@@ -167,6 +170,7 @@ export default function EditModal(props: EditModalProps) {
         receita: parseVal(fields.receita),
         ligacoes_whatsapp: parseVal(fields.ligacoes_whatsapp),
         tempo_em_linha: parseVal(fields.tempo_em_linha),
+        rqa: parseVal(fields.rqa),
         updatedAt: now,
       }, selectedDate);
     } else {
